@@ -9,11 +9,14 @@
     "lint": "eslint",
     "generate-secrets": "node scripts/generate-secrets.mjs",
     "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "jose": "^6.2.3",
