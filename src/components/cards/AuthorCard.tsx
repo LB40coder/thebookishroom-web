@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Author } from "@/lib/types";
 import { getBooksByAuthor } from "@/lib/data/books";
+import { CoverImage } from "@/components/ui/CoverImage";
 
 interface AuthorCardProps {
   author: Author;
@@ -17,12 +17,10 @@ export function AuthorCard({ author }: AuthorCardProps) {
     >
       <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-coffee/15 group-hover:border-burgundy/40 transition-colors">
         {author.image ? (
-          <Image
+          <CoverImage
             src={author.image}
             alt={author.name}
-            fill
-            className="object-cover"
-            sizes="96px"
+            variant="avatar"
           />
         ) : (
           <div className="w-full h-full bg-cream-dark flex items-center justify-center text-coffee font-serif text-2xl">

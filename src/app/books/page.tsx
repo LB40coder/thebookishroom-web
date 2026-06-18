@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { books } from "@/lib/data/books";
 import { BookCard } from "@/components/cards/BookCard";
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = {
   title: "Books",
   description:

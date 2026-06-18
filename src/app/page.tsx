@@ -7,6 +7,8 @@ import { BookFinderCTA } from "@/components/home/BookFinderCTA";
 import { LatestArticles } from "@/components/home/LatestArticles";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 
+export const revalidate = 86400;
+
 export default function HomePage() {
   return (
     <>

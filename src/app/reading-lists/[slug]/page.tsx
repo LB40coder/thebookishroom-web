@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { Clock, ArrowLeft } from "lucide-react";
 import { getPostBySlug, posts } from "@/lib/data/posts";
@@ -8,6 +7,9 @@ import { getBookBySlug } from "@/lib/data/books";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
+import { CoverImage } from "@/components/ui/CoverImage";
+
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -78,13 +80,11 @@ export default async function PostPage({ params }: PageProps) {
           </p>
 
           <div className="relative aspect-[16/9] rounded-sm overflow-hidden my-8">
-            <Image
+            <CoverImage
               src={post.coverImage}
               alt={post.title}
-              fill
-              className="object-cover"
+              variant="detail-post"
               priority
-              sizes="(max-width: 768px) 100vw, 768px"
             />
           </div>
 

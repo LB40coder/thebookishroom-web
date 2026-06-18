@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { authors as authorList } from "@/lib/data/authors";
 import { getBooksByAuthor } from "@/lib/data/books";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { CoverImage } from "@/components/ui/CoverImage";
 
 export function PopularAuthors() {
   return (
@@ -21,12 +21,10 @@ export function PopularAuthors() {
               >
                 <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-coffee/15 group-hover:border-burgundy/40 transition-colors">
                   {author.image ? (
-                    <Image
+                    <CoverImage
                       src={author.image}
                       alt={author.name}
-                      fill
-                      className="object-cover"
-                      sizes="80px"
+                      variant="avatar"
                     />
                   ) : (
                     <div className="w-full h-full bg-cream-dark flex items-center justify-center text-coffee font-serif text-lg">

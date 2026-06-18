@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { classicGuides } from "@/lib/data/posts";
 import { Button } from "@/components/ui/Button";
+import { CoverImage } from "@/components/ui/CoverImage";
+
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: "Classics",
@@ -32,12 +34,10 @@ export default function ClassicsPage() {
         <div className="bg-cream rounded-sm overflow-hidden border border-coffee/10 mb-12">
           <div className="grid lg:grid-cols-2">
             <div className="relative aspect-[16/10] lg:aspect-auto lg:min-h-[300px]">
-              <Image
+              <CoverImage
                 src={featured.image}
                 alt={featured.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                variant="featured"
               />
               <span className="absolute top-4 left-4 bg-forest text-cream text-[10px] font-medium tracking-wider uppercase px-2 py-1 rounded-sm">
                 Featured Guide
@@ -64,12 +64,10 @@ export default function ClassicsPage() {
               className="group flex items-center gap-4 p-4 bg-cream rounded-sm border border-coffee/10 hover:border-coffee/25 transition-colors"
             >
               <div className="relative w-16 h-16 rounded-sm overflow-hidden shrink-0">
-                <Image
+                <CoverImage
                   src={guide.image}
                   alt={guide.title}
-                  fill
-                  className="object-cover"
-                  sizes="64px"
+                  variant="thumb"
                 />
               </div>
               <div className="flex-1 min-w-0">

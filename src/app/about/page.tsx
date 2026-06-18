@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = {
   title: "About",
   description:

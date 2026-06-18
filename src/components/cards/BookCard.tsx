@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Book } from "@/lib/types";
 import { Button } from "@/components/ui/Button";
+import { CoverImage } from "@/components/ui/CoverImage";
 
 interface BookCardProps {
   book: Book;
@@ -13,12 +13,10 @@ export function BookCard({ book, showDetails = true }: BookCardProps) {
     <article className="bg-cream rounded-sm border border-coffee/10 overflow-hidden hover:border-coffee/25 transition-colors">
       <div className="relative aspect-[3/4] bg-cream-dark">
         {book.coverImage ? (
-          <Image
+          <CoverImage
             src={book.coverImage}
             alt={book.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 640px) 50vw, 25vw"
+            variant="card-book"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-coffee font-serif text-lg p-4 text-center">

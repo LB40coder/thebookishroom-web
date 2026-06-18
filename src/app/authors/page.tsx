@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { authors } from "@/lib/data/authors";
 import { AuthorCard } from "@/components/cards/AuthorCard";
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = {
   title: "Authors",
   description:

@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { articles } from "@/lib/data/posts";
 import { formatDate } from "@/lib/utils";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { CoverImage } from "@/components/ui/CoverImage";
 
 export function LatestArticles() {
   return (
@@ -16,12 +16,11 @@ export function LatestArticles() {
             <article key={article.slug} className="group">
               <Link href={`/reading-lists/${article.slug}`}>
                 <div className="relative aspect-[16/10] rounded-sm overflow-hidden mb-3">
-                  <Image
+                  <CoverImage
                     src={article.coverImage}
                     alt={article.title}
-                    fill
-                    className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                    sizes="(max-width: 640px) 100vw, 25vw"
+                    variant="card-post"
+                    className="group-hover:scale-[1.02] transition-transform duration-300"
                   />
                 </div>
                 <p className="text-xs text-coffee">

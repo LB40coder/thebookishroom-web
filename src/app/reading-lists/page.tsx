@@ -3,6 +3,8 @@ import { posts } from "@/lib/data/posts";
 import { moods } from "@/lib/data/moods";
 import { PostCard } from "@/components/cards/PostCard";
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = {
   title: "Reading Lists",
   description:

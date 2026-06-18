@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { books, getBookBySlug } from "@/lib/data/books";
@@ -8,6 +7,9 @@ import { getAuthorBySlug } from "@/lib/data/authors";
 import { posts } from "@/lib/data/posts";
 import { Button } from "@/components/ui/Button";
 import { BuyOnAmazon } from "@/components/books/BuyOnAmazon";
+import { CoverImage } from "@/components/ui/CoverImage";
+
+export const revalidate = 86400;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -62,13 +64,11 @@ export default async function BookPage({ params }: PageProps) {
             <div className="lg:sticky lg:top-24 space-y-0">
               <div className="relative aspect-[3/4] rounded-sm overflow-hidden bg-cream-dark">
                 {book.coverImage ? (
-                  <Image
+                  <CoverImage
                     src={book.coverImage}
                     alt={book.title}
-                    fill
-                    className="object-cover"
+                    variant="detail-book"
                     priority
-                    sizes="(max-width: 1024px) 100vw, 33vw"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-coffee font-serif text-xl p-6 text-center">

@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { classicGuides } from "@/lib/data/posts";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { CoverImage } from "@/components/ui/CoverImage";
 
 export function StartWithClassics() {
   const featured = classicGuides.find((g) => g.featured)!;
@@ -17,12 +17,10 @@ export function StartWithClassics() {
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="bg-cream rounded-sm overflow-hidden border border-coffee/10">
             <div className="relative aspect-[16/9]">
-              <Image
+              <CoverImage
                 src={featured.image}
                 alt={featured.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 50vw"
+                variant="featured"
               />
             </div>
             <div className="p-6">
@@ -48,12 +46,10 @@ export function StartWithClassics() {
                 className="group flex items-center gap-4 p-4 bg-cream rounded-sm border border-coffee/10 hover:border-coffee/25 transition-colors"
               >
                 <div className="relative w-16 h-16 rounded-sm overflow-hidden shrink-0">
-                  <Image
+                  <CoverImage
                     src={guide.image}
                     alt={guide.title}
-                    fill
-                    className="object-cover"
-                    sizes="64px"
+                    variant="thumb"
                   />
                 </div>
                 <div className="flex-1 min-w-0">

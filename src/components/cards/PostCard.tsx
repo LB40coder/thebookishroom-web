@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 import type { Post } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
+import { CoverImage } from "@/components/ui/CoverImage";
 
 interface PostCardProps {
   post: Post;
@@ -13,12 +13,11 @@ export function PostCard({ post }: PostCardProps) {
     <article className="group">
       <Link href={`/reading-lists/${post.slug}`}>
         <div className="relative aspect-[16/10] rounded-sm overflow-hidden mb-4">
-          <Image
+          <CoverImage
             src={post.coverImage}
             alt={post.title}
-            fill
-            className="object-cover group-hover:scale-[1.02] transition-transform duration-300"
-            sizes="(max-width: 768px) 100vw, 33vw"
+            variant="card-post"
+            className="group-hover:scale-[1.02] transition-transform duration-300"
           />
           <span className="absolute top-3 left-3 bg-forest text-cream text-[10px] font-medium tracking-wider uppercase px-2 py-1 rounded-sm">
             {post.category}

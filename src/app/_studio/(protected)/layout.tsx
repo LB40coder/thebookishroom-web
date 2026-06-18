@@ -4,6 +4,8 @@ import { getSessionFromCookies } from "@/lib/auth/session";
 import { getAdminPath } from "@/lib/auth/security";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProtectedStudioLayout({
   children,
 }: {

@@ -8,6 +8,8 @@ import { filterBooks } from "@/lib/data/books";
 import { PostCard } from "@/components/cards/PostCard";
 import { BookCard } from "@/components/cards/BookCard";
 
+export const revalidate = 86400;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

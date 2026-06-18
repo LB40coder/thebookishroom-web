@@ -14,6 +14,8 @@ import { moods } from "@/lib/data/moods";
 import { getPostsByMood } from "@/lib/data/posts";
 import { PostCard } from "@/components/cards/PostCard";
 
+export const revalidate = 86400;
+
 export const metadata: Metadata = {
   title: "Book Moods",
   description:

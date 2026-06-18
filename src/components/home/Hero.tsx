@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { images } from "@/lib/images";
+import { CoverImage } from "@/components/ui/CoverImage";
 
 export function Hero() {
   return (
@@ -29,14 +29,11 @@ export function Hero() {
           </div>
 
           <div className="relative aspect-[4/3] rounded-sm overflow-hidden">
-            <Image
+            <CoverImage
               src={images.hero}
               alt="Cozy bookshelf with classic books, a candle, and a potted plant"
-              fill
-              className="object-cover"
+              variant="hero"
               priority
-              unoptimized
-              sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
         </div>
