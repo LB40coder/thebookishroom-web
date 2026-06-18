@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  excerpt        String
+  content        String   @default("")
+  coverImage     String
+  category       String   @default("Reading Lists")
+  tags           String[]
+  moods          String[]
+  relatedBooks   String[]
+  readingTime    Int      @default(5)
+  views          Int      @default(0)
+  seoTitle       String
+  seoDescription String
+  published      Boolean  @default(false)
+  publishedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([published, publishedAt])
+  @@index([slug])
+}
+
+model Book {
+  id                   String   @id @default(cuid())
+  title                String
+  slug                 String   @unique
+  author               String
+  authorSlug           String
+  year                 Int
+  genres               String[]
+  moods                String[]
+  difficulty           String
+  length               String
+  description          String
+  whyRead              String
+  whoIsItFor           String
+  estimatedReadingTime String
+  similarBooks         String[]
+  coverImage           String?
+  amazonEditions       Json?
+  published            Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([slug])
+  @@index([authorSlug])
+}
+
+model Author {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  bio          String
+  nationality  String
+  birthYear    Int?
+  deathYear    Int?
+  mainBooks    String[]
+  whereToStart String
+  readingOrder String[]
+  image        String?
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([slug])
+}
+
+model ApiLog {
+  id        String   @id @default(cuid())
+  method    String
+  path      String
+  ip        String?
+  userAgent String?
+  status    Int
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([ip, createdAt])
+}

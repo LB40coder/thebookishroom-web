@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#EDE5D8"/>
+  <rect x="120" y="80" width="560" height="440" rx="4" fill="#6B4F3B" opacity="0.15"/>
+  <rect x="160" y="120" width="60" height="360" rx="2" fill="#344736"/>
+  <rect x="230" y="140" width="50" height="340" rx="2" fill="#7A2E3A"/>
+  <rect x="290" y="130" width="55" height="350" rx="2" fill="#6B4F3B"/>
+  <rect x="355" y="150" width="48" height="330" rx="2" fill="#344736" opacity="0.8"/>
+  <rect x="415" y="125" width="52" height="355" rx="2" fill="#7A2E3A" opacity="0.85"/>
+  <rect x="475" y="135" width="50" height="345" rx="2" fill="#6B4F3B" opacity="0.9"/>
+  <rect x="535" y="145" width="55" height="335" rx="2" fill="#344736"/>
+  <circle cx="680" cy="480" r="40" fill="#344736" opacity="0.3"/>
+  <rect x="100" y="60" width="80" height="100" rx="2" fill="#C9A45C" opacity="0.4"/>
+  <text x="400" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="14" fill="#6B4F3B" opacity="0.5">The Bookish Room</text>
+</svg>
