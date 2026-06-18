@@ -45,12 +45,14 @@ export async function uploadImage(file: File): Promise<{
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const storedName = `${crypto.randomUUID()}${extensionForMime(file.type)}`;
+  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (blobToken) {
     const blob = await put(`media/${storedName}`, buffer, {
       access: "public",
       contentType: file.type,
       addRandomSuffix: false,
+      token: blobToken,
     });
     return {
       url: blob.url,
@@ -58,6 +60,12 @@ export async function uploadImage(file: File): Promise<{
       mimeType: file.type,
       size: buffer.length,
     };
+  }
+
+  if (process.env.VERCEL) {
+    throw new Error(
+      "Uploads on Vercel require Blob storage. In the Vercel dashboard go to Storage → Create Blob → Connect to this project, then redeploy."
+    );
   }
 
   const year = new Date().getFullYear().toString();

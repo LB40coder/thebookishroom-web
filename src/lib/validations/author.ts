@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+function htmlMinLength(min: number) {
+  return (value: string) =>
+    value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().length >= min;
+}
+
 const imageUrlSchema = z
   .string()
   .url()
@@ -13,7 +18,10 @@ export const authorSchema = z.object({
     .min(3)
     .max(120)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  bio: z.string().min(20).max(3000),
+  bio: z
+    .string()
+    .refine(htmlMinLength(20), "Bio must be at least 20 characters")
+    .refine((v) => v.length <= 10_000, "Bio is too long"),
   nationality: z.string().min(2).max(80),
   birthYear: z.number().int().min(0).max(2100).optional(),
   deathYear: z.number().int().min(0).max(2100).optional(),

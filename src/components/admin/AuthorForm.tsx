@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Author } from "@prisma/client";
-import { slugify } from "@/lib/utils";
+import { slugify, stripHtml } from "@/lib/utils";
+import { formatValidationErrors } from "@/lib/validations/errors";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageField } from "./ImageField";
 import { inputClassName, labelClassName, textareaClassName } from "./form-styles";
@@ -49,6 +50,24 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
     setLoading(true);
     setError("");
 
+    if (stripHtml(form.bio).length < 20) {
+      setError("Bio must be at least 20 characters.");
+      setLoading(false);
+      return;
+    }
+
+    if (form.whereToStart.trim().length < 10) {
+      setError("Where to Start must be at least 10 characters.");
+      setLoading(false);
+      return;
+    }
+
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)) {
+      setError("Slug must use lowercase letters, numbers, and hyphens only.");
+      setLoading(false);
+      return;
+    }
+
     const payload = {
       name: form.name,
       slug: form.slug,
@@ -80,7 +99,7 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
 
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || "Failed to save");
+        setError(formatValidationErrors(data.details) || data.error || "Failed to save");
         return;
       }
 
@@ -134,6 +153,7 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
 
       <div>
         <label className={labelClassName}>Bio</label>
+        <p className="text-[11px] text-coffee mb-2">At least 20 characters.</p>
         <RichTextEditor
           value={form.bio}
           onChange={(html) => update("bio", html)}
@@ -174,6 +194,7 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
 
       <div>
         <label className={labelClassName}>Where to Start</label>
+        <p className="text-[11px] text-coffee mb-2">At least 10 characters.</p>
         <textarea
           value={form.whereToStart}
           onChange={(e) => update("whereToStart", e.target.value)}
