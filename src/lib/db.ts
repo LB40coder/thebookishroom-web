@@ -1,5 +1,21 @@
 import { PrismaClient } from "@prisma/client";
 
+function resolveDatabaseUrl(): string | undefined {
+  return (
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL_UNPOOLED ||
+    undefined
+  );
+}
+
+// Vercel Neon integration exposes POSTGRES_* — Prisma expects DATABASE_URL
+if (!process.env.DATABASE_URL) {
+  const url = resolveDatabaseUrl();
+  if (url) process.env.DATABASE_URL = url;
+}
+
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
 export const prisma =
@@ -13,5 +29,5 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export function isDatabaseConfigured(): boolean {
-  return Boolean(process.env.DATABASE_URL);
+  return Boolean(resolveDatabaseUrl());
 }
