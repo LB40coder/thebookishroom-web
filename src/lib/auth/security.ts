@@ -25,4 +25,4 @@ export function getAdminPath(): string {
   return path.replace(/^\/+|\/+$/g, "");
 }
 
-export const ADMIN_INTERNAL_PATH = "/_studio";
+export const ADMIN_INTERNAL_PATH = "/studio";

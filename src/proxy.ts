@@ -8,7 +8,7 @@ import {
 } from "@/lib/auth/security";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth/session";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const adminPath = getAdminPath();
 
@@ -59,7 +59,7 @@ export const config = {
   matcher: [
     "/api/v1/:path*",
     "/api/admin/:path*",
-    "/_studio/:path*",
+    "/studio/:path*",
     "/((?!_next/static|_next/image|favicon.ico|images|robots.txt).*)",
   ],
 };
