@@ -1,5 +1,7 @@
-import type { Book } from "@/lib/types";
+import type { Book, AmazonEdition, Difficulty, Length } from "@/lib/types";
 import { images } from "@/lib/images";
+import type { Book as PrismaBook } from "@prisma/client";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 
 export const books: Book[] = [
   {
@@ -226,4 +228,38 @@ export function filterBooks(filters: {
       return false;
     return true;
   });
+}
+
+function toBook(row: PrismaBook): Book {
+  return {
+    title: row.title,
+    slug: row.slug,
+    author: row.author,
+    authorSlug: row.authorSlug,
+    year: row.year,
+    genres: row.genres,
+    moods: row.moods,
+    difficulty: row.difficulty as Difficulty,
+    length: row.length as Length,
+    description: row.description,
+    whyRead: row.whyRead,
+    whoIsItFor: row.whoIsItFor,
+    estimatedReadingTime: row.estimatedReadingTime,
+    similarBooks: row.similarBooks,
+    coverImage: row.coverImage ?? undefined,
+    amazonEditions: (row.amazonEditions as AmazonEdition[] | null) ?? undefined,
+  };
+}
+
+export async function getPublishedBooksByAuthorSlug(
+  authorSlug: string
+): Promise<Book[]> {
+  if (!isDatabaseConfigured()) return [];
+
+  const rows = await prisma.book.findMany({
+    where: { authorSlug, published: true },
+    orderBy: { title: "asc" },
+  });
+
+  return rows.map(toBook);
 }

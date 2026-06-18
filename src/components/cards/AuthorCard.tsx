@@ -1,15 +1,13 @@
 import Link from "next/link";
 import type { Author } from "@/lib/types";
-import { getBooksByAuthor } from "@/lib/data/books";
 import { CoverImage } from "@/components/ui/CoverImage";
 
 interface AuthorCardProps {
   author: Author;
+  bookCount?: number;
 }
 
-export function AuthorCard({ author }: AuthorCardProps) {
-  const bookCount = getBooksByAuthor(author.slug).length;
-
+export function AuthorCard({ author, bookCount = 0 }: AuthorCardProps) {
   return (
     <Link
       href={`/authors/${author.slug}`}

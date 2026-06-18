@@ -41,7 +41,7 @@ export default async function BookPage({ params }: PageProps) {
   const book = getBookBySlug(slug);
   if (!book) notFound();
 
-  const author = getAuthorBySlug(book.authorSlug);
+  const author = await getAuthorBySlug(book.authorSlug);
   const similarBooks = book.similarBooks
     .map((s) => getBookBySlug(s))
     .filter(Boolean);

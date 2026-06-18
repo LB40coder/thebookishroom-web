@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Search, X, BookOpen, User, Sparkles, FileText } from "lucide-react";
-import { searchContent, type SearchResult } from "@/lib/search";
+import type { SearchResult } from "@/lib/search";
 
 interface SearchDialogProps {
   open: boolean;
@@ -52,7 +52,30 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
   }, [open, onClose]);
 
   useEffect(() => {
-    setResults(searchContent(query));
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setResults([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setResults(data.data ?? []);
+      } catch {
+        if (!controller.signal.aborted) setResults([]);
+      }
+    }, 200);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
   }, [query]);
 
   if (!open) return null;

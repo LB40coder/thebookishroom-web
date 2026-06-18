@@ -1,50 +1,69 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { authors, getAuthorBySlug } from "@/lib/data/authors";
-import { getBooksByAuthor } from "@/lib/data/books";
-import { posts } from "@/lib/data/posts";
+import {
+  getAuthorBySlug,
+  getAuthorSlugs,
+} from "@/lib/data/authors";
+import { getPublishedBooksByAuthorSlug } from "@/lib/data/books";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
+import { stripHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { CoverImage } from "@/components/ui/CoverImage";
+import { RichTextContent } from "@/components/ui/RichTextContent";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return authors.map((author) => ({ slug: author.slug }));
+  const slugs = await getAuthorSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const author = getAuthorBySlug(slug);
+  const author = await getAuthorBySlug(slug);
   if (!author) return { title: "Author Not Found" };
+
+  const description = stripHtml(author.bio).slice(0, 160);
 
   return {
     title: author.name,
-    description: author.bio.slice(0, 160),
+    description,
     openGraph: {
       title: `${author.name} — Author Profile`,
-      description: author.bio.slice(0, 160),
+      description,
       images: author.image ? [{ url: author.image }] : undefined,
     },
   };
 }
 
 export default async function AuthorPage({ params }: PageProps) {
+  noStore();
   const { slug } = await params;
-  const author = getAuthorBySlug(slug);
+  const author = await getAuthorBySlug(slug);
   if (!author) notFound();
 
-  const authorBooks = getBooksByAuthor(slug);
-  const relatedPosts = posts.filter((p) =>
-    p.relatedBooks.some((bookSlug) =>
-      authorBooks.some((b) => b.slug === bookSlug)
-    )
-  );
+  const authorBooks = await getPublishedBooksByAuthorSlug(slug);
+
+  const relatedPosts =
+    isDatabaseConfigured() && authorBooks.length > 0
+      ? await prisma.post.findMany({
+          where: {
+            published: true,
+            relatedBooks: {
+              hasSome: authorBooks.map((book) => book.slug),
+            },
+          },
+          orderBy: { publishedAt: "desc" },
+          take: 6,
+        })
+      : [];
 
   const period = author.deathYear
     ? `${author.birthYear}–${author.deathYear}`
@@ -91,7 +110,10 @@ export default async function AuthorPage({ params }: PageProps) {
 
         <section className="mb-10">
           <h2 className="font-serif text-xl text-ink mb-3">About the Author</h2>
-          <p className="text-coffee font-reading leading-relaxed">{author.bio}</p>
+          <RichTextContent
+            html={author.bio}
+            className="text-coffee font-reading leading-relaxed"
+          />
         </section>
 
         <section className="mb-10 p-5 bg-cream-dark/50 rounded-sm border border-coffee/10">
@@ -125,7 +147,7 @@ export default async function AuthorPage({ params }: PageProps) {
                     <h3 className="font-serif text-base text-ink">{book.title}</h3>
                     <p className="text-sm text-coffee">{book.year}</p>
                     <p className="mt-1 text-sm text-coffee line-clamp-2">
-                      {book.description}
+                      {stripHtml(book.description)}
                     </p>
                     <Button
                       href={`/books/${book.slug}`}
@@ -177,13 +199,13 @@ export default async function AuthorPage({ params }: PageProps) {
           <section className="pt-8 border-t border-coffee/10">
             <h2 className="font-serif text-xl text-ink mb-4">Related Posts</h2>
             <ul className="space-y-2">
-              {relatedPosts.map((p) => (
-                <li key={p.slug}>
+              {relatedPosts.map((post) => (
+                <li key={post.slug}>
                   <Link
-                    href={`/reading-lists/${p.slug}`}
+                    href={`/reading-lists/${post.slug}`}
                     className="text-burgundy hover:underline text-sm font-medium"
                   >
-                    {p.title}
+                    {post.title}
                   </Link>
                 </li>
               ))}

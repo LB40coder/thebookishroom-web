@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { authors } from "@/lib/data/authors";
+import { unstable_noStore as noStore } from "next/cache";
 import { AuthorCard } from "@/components/cards/AuthorCard";
+import { getPublishedAuthorsWithBookCounts } from "@/lib/data/authors";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Authors",
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
     "Explore author profiles with biographies, best books, and reading guides for where to start.",
 };
 
-export default function AuthorsPage() {
+export default async function AuthorsPage() {
+  noStore();
+  const authors = await getPublishedAuthorsWithBookCounts();
+
   return (
     <div className="section-padding">
       <div className="section-container">
@@ -22,11 +26,15 @@ export default function AuthorsPage() {
           </p>
         </header>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {authors.map((author) => (
-            <AuthorCard key={author.slug} author={author} />
-          ))}
-        </div>
+        {authors.length === 0 ? (
+          <p className="text-coffee text-sm">No authors published yet.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {authors.map((author) => (
+              <AuthorCard key={author.slug} author={author} bookCount={author.bookCount} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

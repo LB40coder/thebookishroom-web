@@ -1,74 +1,80 @@
+import type { Author as PrismaAuthor } from "@prisma/client";
 import type { Author } from "@/lib/types";
-import { images } from "@/lib/images";
+import { prisma, isDatabaseConfigured } from "@/lib/db";
 
-export const authors: Author[] = [
-  {
-    name: "Marcus Aurelius",
-    slug: "marcus-aurelius",
-    bio: "Roman emperor from 161 to 180 AD and a Stoic philosopher. His personal writings, known as Meditations, have inspired readers for nearly two millennia with their practical wisdom on virtue, resilience, and the human condition.",
-    nationality: "Roman",
-    birthYear: 121,
-    deathYear: 180,
-    mainBooks: ["meditations"],
-    whereToStart:
-      "Begin with Meditations — it's short, accessible, and can be read in any order. Each passage stands alone as a piece of wisdom.",
-    readingOrder: ["meditations"],
-    image: images.author,
-  },
-  {
-    name: "Mary Shelley",
-    slug: "mary-shelley",
-    bio: "English novelist who wrote Frankenstein at just 18 years old. A pioneer of science fiction and gothic literature, Shelley crafted one of the most enduring and influential novels in the English language.",
-    nationality: "English",
-    birthYear: 1797,
-    deathYear: 1851,
-    mainBooks: ["frankenstein"],
-    whereToStart:
-      "Frankenstein is essential reading — start there to experience the novel that invented modern science fiction.",
-    readingOrder: ["frankenstein"],
-    image: images.author,
-  },
-  {
-    name: "Oscar Wilde",
-    slug: "oscar-wilde",
-    bio: "Irish poet and playwright known for his wit, flamboyant style, and brilliant social commentary. The Picture of Dorian Gray remains his most celebrated work of fiction.",
-    nationality: "Irish",
-    birthYear: 1854,
-    deathYear: 1900,
-    mainBooks: ["the-picture-of-dorian-gray"],
-    whereToStart:
-      "The Picture of Dorian Gray is the perfect entry point — a gothic novel filled with Wilde's signature wit and aphorisms.",
-    readingOrder: ["the-picture-of-dorian-gray"],
-    image: images.author,
-  },
-  {
-    name: "Jane Austen",
-    slug: "jane-austen",
-    bio: "English novelist whose works of romantic fiction set among the landed gentry earned her a place among the most widely read writers in English literature.",
-    nationality: "English",
-    birthYear: 1775,
-    deathYear: 1817,
-    mainBooks: ["pride-and-prejudice"],
-    whereToStart:
-      "Pride and Prejudice is the ideal starting point — witty, romantic, and endlessly re-readable.",
-    readingOrder: ["pride-and-prejudice"],
-    image: images.author,
-  },
-  {
-    name: "Fyodor Dostoevsky",
-    slug: "fyodor-dostoevsky",
-    bio: "Russian novelist and philosopher whose works explore human psychology in the troubled political, social, and spiritual atmosphere of 19th-century Russia.",
-    nationality: "Russian",
-    birthYear: 1821,
-    deathYear: 1881,
-    mainBooks: ["white-nights"],
-    whereToStart:
-      "Start with White Nights — a short, beautiful novella that introduces Dostoevsky's emotional depth without overwhelming complexity.",
-    readingOrder: ["white-nights"],
-    image: images.author,
-  },
-];
+export type AuthorWithBookCount = Author & { bookCount: number };
 
-export function getAuthorBySlug(slug: string): Author | undefined {
-  return authors.find((a) => a.slug === slug);
+function toAuthor(row: PrismaAuthor): Author {
+  return {
+    name: row.name,
+    slug: row.slug,
+    bio: row.bio,
+    nationality: row.nationality,
+    birthYear: row.birthYear ?? undefined,
+    deathYear: row.deathYear ?? undefined,
+    mainBooks: row.mainBooks,
+    whereToStart: row.whereToStart,
+    readingOrder: row.readingOrder,
+    image: row.image ?? undefined,
+  };
+}
+
+export async function getPublishedAuthors(): Promise<Author[]> {
+  if (!isDatabaseConfigured()) return [];
+
+  const rows = await prisma.author.findMany({
+    where: { published: true },
+    orderBy: { name: "asc" },
+  });
+
+  return rows.map(toAuthor);
+}
+
+export async function getPublishedAuthorsWithBookCounts(): Promise<
+  AuthorWithBookCount[]
+> {
+  if (!isDatabaseConfigured()) return [];
+
+  const [authors, bookCounts] = await Promise.all([
+    prisma.author.findMany({
+      where: { published: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.book.groupBy({
+      by: ["authorSlug"],
+      where: { published: true },
+      _count: { _all: true },
+    }),
+  ]);
+
+  const countBySlug = new Map(
+    bookCounts.map((row) => [row.authorSlug, row._count._all])
+  );
+
+  return authors.map((row) => ({
+    ...toAuthor(row),
+    bookCount: countBySlug.get(row.slug) ?? 0,
+  }));
+}
+
+export async function getAuthorBySlug(slug: string): Promise<Author | null> {
+  if (!isDatabaseConfigured()) return null;
+
+  const row = await prisma.author.findFirst({
+    where: { slug, published: true },
+  });
+
+  return row ? toAuthor(row) : null;
+}
+
+export async function getAuthorSlugs(): Promise<string[]> {
+  if (!isDatabaseConfigured()) return [];
+
+  const rows = await prisma.author.findMany({
+    where: { published: true },
+    select: { slug: true },
+    orderBy: { name: "asc" },
+  });
+
+  return rows.map((row) => row.slug);
 }
