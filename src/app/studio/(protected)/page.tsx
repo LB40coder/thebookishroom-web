@@ -64,12 +64,30 @@ Content-Type: application/json`}
         </p>
       </div>
 
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-wrap gap-3">
         <Link
           href={`/${adminPath}/posts`}
           className="px-4 py-2 bg-forest text-cream text-sm rounded-sm hover:bg-forest/90 transition-colors"
         >
-          Manage Posts
+          Posts
+        </Link>
+        <Link
+          href={`/${adminPath}/books`}
+          className="px-4 py-2 bg-forest text-cream text-sm rounded-sm hover:bg-forest/90 transition-colors"
+        >
+          Books
+        </Link>
+        <Link
+          href={`/${adminPath}/authors`}
+          className="px-4 py-2 bg-forest text-cream text-sm rounded-sm hover:bg-forest/90 transition-colors"
+        >
+          Authors
+        </Link>
+        <Link
+          href={`/${adminPath}/media`}
+          className="px-4 py-2 border border-forest text-forest text-sm rounded-sm hover:bg-forest/5 transition-colors"
+        >
+          Media Library
         </Link>
       </div>
     </div>

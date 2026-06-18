@@ -88,3 +88,17 @@ model ApiLog {
   @@index([createdAt])
   @@index([ip, createdAt])
 }
+
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  alt       String?
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

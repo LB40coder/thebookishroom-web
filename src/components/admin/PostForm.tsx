@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Post } from "@prisma/client";
+import { slugify } from "@/lib/utils";
+import { RichTextEditor } from "./RichTextEditor";
+import { ImageField } from "./ImageField";
+import { inputClassName, labelClassName, textareaClassName } from "./form-styles";
 
 interface PostFormProps {
   adminPath: string;
@@ -23,6 +27,7 @@ export function PostForm({ adminPath, post }: PostFormProps) {
     category: post?.category ?? "Reading Lists",
     tags: post?.tags.join(", ") ?? "",
     moods: post?.moods.join(", ") ?? "",
+    relatedBooks: post?.relatedBooks.join(", ") ?? "",
     readingTime: post?.readingTime ?? 5,
     seoTitle: post?.seoTitle ?? "",
     seoDescription: post?.seoDescription ?? "",
@@ -31,6 +36,15 @@ export function PostForm({ adminPath, post }: PostFormProps) {
 
   function update(field: string, value: string | number | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function handleTitleChange(title: string) {
+    setForm((prev) => ({
+      ...prev,
+      title,
+      slug: post ? prev.slug : slugify(title),
+      seoTitle: prev.seoTitle || (title ? `${title} | The Bookish Room` : ""),
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -42,7 +56,10 @@ export function PostForm({ adminPath, post }: PostFormProps) {
       ...form,
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
       moods: form.moods.split(",").map((m) => m.trim()).filter(Boolean),
-      relatedBooks: post?.relatedBooks ?? [],
+      relatedBooks: form.relatedBooks
+        .split(",")
+        .map((b) => b.trim())
+        .filter(Boolean),
       readingTime: Number(form.readingTime),
       seoTitle: form.seoTitle || `${form.title} | The Bookish Room`,
     };
@@ -80,46 +97,130 @@ export function PostForm({ adminPath, post }: PostFormProps) {
     router.refresh();
   }
 
-  const fields = [
-    { key: "title", label: "Title", type: "text" },
-    { key: "slug", label: "Slug", type: "text" },
-    { key: "excerpt", label: "Excerpt", type: "textarea" },
-    { key: "content", label: "Content", type: "textarea" },
-    { key: "coverImage", label: "Cover Image URL", type: "text" },
-    { key: "category", label: "Category", type: "text" },
-    { key: "tags", label: "Tags (comma-separated)", type: "text" },
-    { key: "moods", label: "Moods (comma-separated)", type: "text" },
-    { key: "readingTime", label: "Reading Time (min)", type: "number" },
-    { key: "seoTitle", label: "SEO Title", type: "text" },
-    { key: "seoDescription", label: "SEO Description", type: "textarea" },
-  ] as const;
-
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
-      {fields.map(({ key, label, type }) => (
-        <div key={key}>
-          <label className="block text-sm text-coffee mb-1">{label}</label>
-          {type === "textarea" ? (
-            <textarea
-              value={form[key as keyof typeof form] as string}
-              onChange={(e) => update(key, e.target.value)}
-              rows={key === "content" ? 8 : 3}
-              className="w-full px-3 py-2 text-sm bg-cream border border-coffee/20 rounded-sm focus:outline-none focus:ring-1 focus:ring-forest/50"
-              required={key === "excerpt" || key === "seoDescription"}
-            />
-          ) : (
-            <input
-              type={type}
-              value={form[key as keyof typeof form] as string | number}
-              onChange={(e) =>
-                update(key, type === "number" ? Number(e.target.value) : e.target.value)
-              }
-              className="w-full px-3 py-2 text-sm bg-cream border border-coffee/20 rounded-sm focus:outline-none focus:ring-1 focus:ring-forest/50"
-              required={!["seoTitle"].includes(key)}
-            />
-          )}
+    <form onSubmit={handleSubmit} className="max-w-3xl space-y-5">
+      <div>
+        <label className={labelClassName}>Title</label>
+        <input
+          type="text"
+          value={form.title}
+          onChange={(e) => handleTitleChange(e.target.value)}
+          className={inputClassName}
+          required
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName}>Slug</label>
+        <input
+          type="text"
+          value={form.slug}
+          onChange={(e) => update("slug", e.target.value)}
+          className={inputClassName}
+          required
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName}>Excerpt</label>
+        <textarea
+          value={form.excerpt}
+          onChange={(e) => update("excerpt", e.target.value)}
+          rows={3}
+          className={textareaClassName}
+          required
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName}>Content</label>
+        <RichTextEditor
+          value={form.content}
+          onChange={(html) => update("content", html)}
+          placeholder="Write your reading list article..."
+        />
+      </div>
+
+      <ImageField
+        label="Cover Image"
+        value={form.coverImage}
+        onChange={(url) => update("coverImage", url)}
+        required
+      />
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className={labelClassName}>Category</label>
+          <input
+            type="text"
+            value={form.category}
+            onChange={(e) => update("category", e.target.value)}
+            className={inputClassName}
+          />
         </div>
-      ))}
+        <div>
+          <label className={labelClassName}>Reading Time (min)</label>
+          <input
+            type="number"
+            value={form.readingTime}
+            onChange={(e) => update("readingTime", Number(e.target.value))}
+            className={inputClassName}
+            min={1}
+            max={120}
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className={labelClassName}>Tags (comma-separated)</label>
+        <input
+          type="text"
+          value={form.tags}
+          onChange={(e) => update("tags", e.target.value)}
+          className={inputClassName}
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName}>Moods (comma-separated)</label>
+        <input
+          type="text"
+          value={form.moods}
+          onChange={(e) => update("moods", e.target.value)}
+          className={inputClassName}
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName}>Related Books (slugs, comma-separated)</label>
+        <input
+          type="text"
+          value={form.relatedBooks}
+          onChange={(e) => update("relatedBooks", e.target.value)}
+          className={inputClassName}
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName}>SEO Title</label>
+        <input
+          type="text"
+          value={form.seoTitle}
+          onChange={(e) => update("seoTitle", e.target.value)}
+          className={inputClassName}
+        />
+      </div>
+
+      <div>
+        <label className={labelClassName}>SEO Description</label>
+        <textarea
+          value={form.seoDescription}
+          onChange={(e) => update("seoDescription", e.target.value)}
+          rows={3}
+          className={textareaClassName}
+          required
+        />
+      </div>
 
       <label className="flex items-center gap-2 text-sm text-ink">
         <input

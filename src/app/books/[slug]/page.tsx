@@ -8,6 +8,7 @@ import { posts } from "@/lib/data/posts";
 import { Button } from "@/components/ui/Button";
 import { BuyOnAmazon } from "@/components/books/BuyOnAmazon";
 import { CoverImage } from "@/components/ui/CoverImage";
+import { RichTextContent } from "@/components/ui/RichTextContent";
 
 export const revalidate = 86400;
 
@@ -134,17 +135,26 @@ export default async function BookPage({ params }: PageProps) {
 
             <section className="mt-8">
               <h2 className="font-serif text-xl text-ink mb-3">About the Book</h2>
-              <p className="text-coffee font-reading leading-relaxed">{book.description}</p>
+              <RichTextContent
+                html={book.description}
+                className="text-coffee font-reading leading-relaxed"
+              />
             </section>
 
             <section className="mt-8">
               <h2 className="font-serif text-xl text-ink mb-3">Why You Should Read It</h2>
-              <p className="text-coffee font-reading leading-relaxed">{book.whyRead}</p>
+              <RichTextContent
+                html={book.whyRead}
+                className="text-coffee font-reading leading-relaxed"
+              />
             </section>
 
             <section className="mt-8">
               <h2 className="font-serif text-xl text-ink mb-3">Who This Book Is For</h2>
-              <p className="text-coffee font-reading leading-relaxed">{book.whoIsItFor}</p>
+              <RichTextContent
+                html={book.whoIsItFor}
+                className="text-coffee font-reading leading-relaxed"
+              />
             </section>
 
             {author && (

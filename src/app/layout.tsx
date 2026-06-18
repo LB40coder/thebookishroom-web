@@ -9,6 +9,7 @@ import "./globals.css";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-playfair",
   display: "swap",
 });
@@ -43,6 +44,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/images/favicon.png",
     apple: "/images/favicon.png",
+  },
+  other: {
+    "google-adsense-account": "ca-pub-5543818748827281",
   },
 };
 

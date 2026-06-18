@@ -30,6 +30,10 @@
   h4 {
     @apply font-serif;
   }
+
+  h2 {
+    @apply font-medium;
+  }
 }
 
 @layer utilities {
@@ -39,5 +43,89 @@
 
   .section-padding {
     @apply py-12 md:py-16 lg:py-20;
+  }
+
+  .prose-studio {
+    @apply font-reading text-ink leading-relaxed;
+  }
+
+  .prose-studio h2 {
+    @apply text-xl font-serif font-medium mt-6 mb-3;
+  }
+
+  .prose-studio h3 {
+    @apply text-lg font-serif mt-5 mb-2;
+  }
+
+  .prose-studio h4 {
+    @apply text-base font-serif mt-4 mb-2;
+  }
+
+  .prose-studio p {
+    @apply mb-4;
+  }
+
+  .prose-studio ul {
+    @apply list-disc pl-6 mb-4 space-y-1;
+  }
+
+  .prose-studio ol {
+    @apply list-decimal pl-6 mb-4 space-y-1;
+  }
+
+  .prose-studio blockquote {
+    @apply border-l-4 border-forest/30 pl-4 italic text-coffee my-4;
+  }
+
+  .prose-studio a {
+    @apply text-burgundy underline;
+  }
+
+  .prose-studio img {
+    @apply rounded-sm my-4 max-w-full h-auto;
+  }
+
+  .prose-reading h2,
+  .prose-reading h3,
+  .prose-reading h4,
+  .prose-reading p,
+  .prose-reading ul,
+  .prose-reading ol,
+  .prose-reading blockquote,
+  .prose-reading a,
+  .prose-reading img {
+    @apply font-reading;
+  }
+
+  .prose-reading h2 {
+    @apply text-2xl font-serif font-medium mt-8 mb-4 text-ink;
+  }
+
+  .prose-reading h3 {
+    @apply text-xl font-serif mt-6 mb-3 text-ink;
+  }
+
+  .prose-reading p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .prose-reading ul {
+    @apply list-disc pl-6 mb-4 space-y-2;
+  }
+
+  .prose-reading ol {
+    @apply list-decimal pl-6 mb-4 space-y-2;
+  }
+
+  .prose-reading blockquote {
+    @apply border-l-4 border-forest/30 pl-4 italic text-coffee my-6;
+  }
+
+  .prose-reading a {
+    @apply text-burgundy underline;
+  }
+
+  .prose-reading img {
+    @apply rounded-sm my-6 max-w-full h-auto;
   }
 }

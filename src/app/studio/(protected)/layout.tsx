@@ -50,6 +50,12 @@ export default async function ProtectedStudioLayout({
               >
                 Authors
               </Link>
+              <Link
+                href={`/${adminPath}/media`}
+                className="text-cream/80 hover:text-cream transition-colors"
+              >
+                Media
+              </Link>
             </nav>
           </div>
           <AdminLogoutButton adminPath={adminPath} />

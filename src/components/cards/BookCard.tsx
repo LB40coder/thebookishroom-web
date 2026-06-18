@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Book } from "@/lib/types";
+import { stripHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { CoverImage } from "@/components/ui/CoverImage";
 
@@ -34,7 +35,7 @@ export function BookCard({ book, showDetails = true }: BookCardProps) {
         {showDetails && (
           <>
             <p className="mt-2 text-sm text-coffee leading-relaxed line-clamp-2">
-              {book.description}
+              {stripHtml(book.description)}
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               <span className="text-[10px] uppercase tracking-wider text-forest bg-forest/5 px-2 py-0.5 rounded-sm">

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
-import { postSchema, postUpdateSchema } from "@/lib/validations/post";
+import { authorSchema } from "@/lib/validations/author";
 import { apiError, parseJsonBody } from "@/lib/api/helpers";
 
 export const runtime = "nodejs";
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const body = await parseJsonBody(request);
   if (body instanceof NextResponse) return body;
 
-  const parsed = postSchema.safeParse(body);
+  const parsed = authorSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Validation failed", details: parsed.error.flatten() },
@@ -20,20 +20,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const existing = await prisma.post.findUnique({
+    const existing = await prisma.author.findUnique({
       where: { slug: parsed.data.slug },
     });
     if (existing) return apiError("Slug already exists", 409);
 
-    const post = await prisma.post.create({
-      data: {
-        ...parsed.data,
-        publishedAt: parsed.data.publishedAt
-          ? new Date(parsed.data.publishedAt)
-          : new Date(),
-      },
-    });
-    return NextResponse.json({ data: post }, { status: 201 });
+    const author = await prisma.author.create({ data: parsed.data });
+    return NextResponse.json({ data: author }, { status: 201 });
   } catch {
     return apiError("Internal server error", 500);
   }

@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "books.google.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
+      { protocol: "https", hostname: "*.public.blob.vercel-storage.com" },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
@@ -26,6 +27,15 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: `public, max-age=${ONE_YEAR}, immutable`,
+          },
+        ],
+      },
+      {
+        source: "/uploads/:path*",
         headers: [
           {
             key: "Cache-Control",

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const imageUrlSchema = z
+  .string()
+  .url()
+  .or(z.string().startsWith("/"))
+  .optional();
+
 export const authorSchema = z.object({
   name: z.string().min(2).max(120),
   slug: z
@@ -14,7 +20,7 @@ export const authorSchema = z.object({
   mainBooks: z.array(z.string()).max(30).optional().default([]),
   whereToStart: z.string().min(10).max(1000),
   readingOrder: z.array(z.string()).max(30).optional().default([]),
-  image: z.string().optional(),
+  image: imageUrlSchema,
   published: z.boolean().optional().default(true),
 });
 

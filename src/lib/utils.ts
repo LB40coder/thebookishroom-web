@@ -19,3 +19,7 @@ export function slugify(text: string): string {
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-");
 }
+
+export function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
