@@ -1,20 +1,43 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
 import { StudioRowActions } from "@/components/admin/StudioRowActions";
+import { BooksAuthorFilter } from "@/components/admin/BooksAuthorFilter";
 
-export default async function AdminBooksPage() {
+export const dynamic = "force-dynamic";
+
+interface PageProps {
+  searchParams: Promise<{ author?: string }>;
+}
+
+export default async function AdminBooksPage({ searchParams }: PageProps) {
   const adminPath = getAdminPath();
   if (!adminPath) notFound();
 
-  const books = isDatabaseConfigured()
-    ? await prisma.book.findMany({ orderBy: { title: "asc" } })
-    : [];
+  const { author: authorSlug } = await searchParams;
+
+  const [books, authors] = isDatabaseConfigured()
+    ? await Promise.all([
+        prisma.book.findMany({
+          where: authorSlug ? { authorSlug } : undefined,
+          orderBy: { title: "asc" },
+        }),
+        prisma.author.findMany({
+          orderBy: { name: "asc" },
+          select: { name: true, slug: true },
+        }),
+      ])
+    : [[], []];
+
+  const selectedAuthor = authorSlug
+    ? authors.find((a) => a.slug === authorSlug)
+    : null;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h1 className="font-serif text-2xl text-ink">Books</h1>
         <Link
           href={`/${adminPath}/books/new`}
@@ -24,8 +47,23 @@ export default async function AdminBooksPage() {
         </Link>
       </div>
 
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <Suspense fallback={null}>
+          <BooksAuthorFilter authors={authors} adminPath={adminPath} />
+        </Suspense>
+        <p className="text-sm text-coffee">
+          {selectedAuthor
+            ? `${books.length} book${books.length === 1 ? "" : "s"} by ${selectedAuthor.name}`
+            : `${books.length} book${books.length === 1 ? "" : "s"}`}
+        </p>
+      </div>
+
       {books.length === 0 ? (
-        <p className="text-sm text-coffee">No books in database yet.</p>
+        <p className="text-sm text-coffee">
+          {selectedAuthor
+            ? `No books found for ${selectedAuthor.name}.`
+            : "No books in database yet."}
+        </p>
       ) : (
         <div className="bg-cream rounded-sm border border-coffee/10 overflow-hidden">
           <table className="w-full text-sm">
