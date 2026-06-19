@@ -61,7 +61,7 @@ export async function getPublishedBooksByAuthorSlug(
 
   const rows = await prisma.book.findMany({
     where: { authorSlug, published: true },
-    orderBy: { title: "asc" },
+    orderBy: { year: "desc" },
   });
 
   return rows.map(toBook);
