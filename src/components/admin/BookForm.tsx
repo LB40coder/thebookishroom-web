@@ -436,12 +436,15 @@ export function BookForm({
 
       <FormSection
         title="Cover Image"
-        description="Displayed in the sidebar on the book page and on book cards."
+        description="Use an image URL or upload a cover file."
       >
         <ImageField
           label="Cover Image"
           value={form.coverImage}
           onChange={(url) => update("coverImage", url)}
+          layout="tabs"
+          urlPlaceholder="https://m.media-amazon.com/images/I/..."
+          urlHelpText="On Amazon: right-click the cover → Copy image address. Also works with Open Library, Google Books, and other direct image URLs."
         />
       </FormSection>
 
