@@ -1,6 +1,6 @@
 import type { Genre as PrismaGenre } from "@prisma/client";
 import type { Genre } from "@/lib/types";
-import { prisma, isDatabaseConfigured } from "@/lib/db";
+import { prisma, isDatabaseConfigured, isMissingPrismaTableError } from "@/lib/db";
 import { DEFAULT_GENRES } from "@/lib/data/taxonomy-defaults";
 
 function toGenre(row: PrismaGenre): Genre {
@@ -27,13 +27,18 @@ export async function ensureDefaultGenresSeeded(): Promise<void> {
 export async function getGenres(): Promise<Genre[]> {
   if (!isDatabaseConfigured()) return DEFAULT_GENRES;
 
-  await ensureDefaultGenresSeeded();
+  try {
+    await ensureDefaultGenresSeeded();
 
-  const rows = await prisma.genre.findMany({
-    orderBy: { name: "asc" },
-  });
+    const rows = await prisma.genre.findMany({
+      orderBy: { name: "asc" },
+    });
 
-  return rows.map(toGenre);
+    return rows.map(toGenre);
+  } catch (error) {
+    if (isMissingPrismaTableError(error)) return DEFAULT_GENRES;
+    throw error;
+  }
 }
 
 export async function createGenre(input: {

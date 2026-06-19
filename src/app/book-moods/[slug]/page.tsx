@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getMoodBySlug, getMoods } from "@/lib/data/moods";
+import { getMoodBySlug } from "@/lib/data/moods";
+import { DEFAULT_MOODS } from "@/lib/data/taxonomy-defaults";
 import { getPostsByMood } from "@/lib/data/posts";
 import { filterBooks } from "@/lib/data/books";
 import { PostCard } from "@/components/cards/PostCard";
@@ -15,8 +16,7 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const moods = await getMoods();
-  return moods.map((mood) => ({ slug: mood.slug }));
+  return DEFAULT_MOODS.map((mood) => ({ slug: mood.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

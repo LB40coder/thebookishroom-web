@@ -31,3 +31,12 @@ if (process.env.NODE_ENV !== "production") {
 export function isDatabaseConfigured(): boolean {
   return Boolean(resolveDatabaseUrl());
 }
+
+export function isMissingPrismaTableError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code: string }).code === "P2021"
+  );
+}

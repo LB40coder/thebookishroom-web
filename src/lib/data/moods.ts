@@ -1,6 +1,6 @@
 import type { Mood as PrismaMood } from "@prisma/client";
 import type { Mood } from "@/lib/types";
-import { prisma, isDatabaseConfigured } from "@/lib/db";
+import { prisma, isDatabaseConfigured, isMissingPrismaTableError } from "@/lib/db";
 import { DEFAULT_MOODS } from "@/lib/data/taxonomy-defaults";
 
 function toMood(row: PrismaMood): Mood {
@@ -33,13 +33,18 @@ export async function ensureDefaultMoodsSeeded(): Promise<void> {
 export async function getMoods(): Promise<Mood[]> {
   if (!isDatabaseConfigured()) return DEFAULT_MOODS;
 
-  await ensureDefaultMoodsSeeded();
+  try {
+    await ensureDefaultMoodsSeeded();
 
-  const rows = await prisma.mood.findMany({
-    orderBy: { name: "asc" },
-  });
+    const rows = await prisma.mood.findMany({
+      orderBy: { name: "asc" },
+    });
 
-  return rows.map(toMood);
+    return rows.map(toMood);
+  } catch (error) {
+    if (isMissingPrismaTableError(error)) return DEFAULT_MOODS;
+    throw error;
+  }
 }
 
 export async function getMoodBySlug(slug: string): Promise<Mood | undefined> {
