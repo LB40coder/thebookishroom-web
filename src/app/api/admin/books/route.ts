@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { bookSchema } from "@/lib/validations/book";
 import { apiError, parseJsonBody } from "@/lib/api/helpers";
+import { revalidateBookPages } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
         amazonEditions: parsed.data.amazonEditions ?? undefined,
       },
     });
+    revalidateBookPages(book.slug);
     return NextResponse.json({ data: book }, { status: 201 });
   } catch {
     return apiError("Internal server error", 500);

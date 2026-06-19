@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { bookUpdateSchema } from "@/lib/validations/book";
 import { apiError, logApiRequest, parseJsonBody } from "@/lib/api/helpers";
+import { revalidateBookPages } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -52,6 +53,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     });
 
     await logApiRequest(request, 200);
+    revalidateBookPages(book.slug);
     return NextResponse.json({ data: book });
   } catch {
     return apiError("Internal server error", 500);
@@ -70,6 +72,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     if (!existing) return apiError("Not found", 404);
 
     await prisma.book.delete({ where: { id: existing.id } });
+    revalidateBookPages(existing.slug);
     return NextResponse.json({ success: true });
   } catch {
     return apiError("Internal server error", 500);

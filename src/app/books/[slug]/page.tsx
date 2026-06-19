@@ -11,7 +11,7 @@ import { BuyOnAmazon } from "@/components/books/BuyOnAmazon";
 import { CoverImage } from "@/components/ui/CoverImage";
 import { RichTextContent } from "@/components/ui/RichTextContent";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;

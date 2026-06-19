@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { bookUpdateSchema } from "@/lib/validations/book";
 import { apiError, parseJsonBody } from "@/lib/api/helpers";
+import { revalidateBookPages } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -39,6 +40,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         amazonEditions: parsed.data.amazonEditions ?? undefined,
       },
     });
+    revalidateBookPages(book.slug);
     return NextResponse.json({ data: book });
   } catch {
     return apiError("Not found", 404);
@@ -51,7 +53,13 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   const { id } = await params;
 
   try {
-    await prisma.book.delete({ where: { id } });
+    const existing = await prisma.book.findFirst({
+      where: { OR: [{ id }, { slug: id }] },
+    });
+    if (!existing) return apiError("Not found", 404);
+
+    await prisma.book.delete({ where: { id: existing.id } });
+    revalidateBookPages(existing.slug);
     return NextResponse.json({ success: true });
   } catch {
     return apiError("Not found", 404);

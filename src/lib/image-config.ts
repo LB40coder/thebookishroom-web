@@ -70,5 +70,6 @@ export function optimizeCoverUrl(
 }
 
 export function shouldSkipImageOptimization(src: string): boolean {
-  return isLocalOrSvg(src);
+  if (isLocalOrSvg(src)) return true;
+  return src.startsWith("http://") || src.startsWith("https://");
 }

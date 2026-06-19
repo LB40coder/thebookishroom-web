@@ -18,7 +18,7 @@ function toBook(row: PrismaBook): Book {
     whoIsItFor: row.whoIsItFor,
     estimatedReadingTime: row.estimatedReadingTime,
     similarBooks: row.similarBooks,
-    coverImage: row.coverImage ?? undefined,
+    coverImage: row.coverImage?.trim() || undefined,
     amazonEditions: (row.amazonEditions as AmazonEdition[] | null) ?? undefined,
   };
 }
