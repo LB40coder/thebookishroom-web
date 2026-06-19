@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { bookLinksToStorage } from "@/lib/authors/book-links";
 
@@ -28,7 +29,7 @@ export const authorBookLinkSchema = z.object({
   url: bookLinkUrlSchema.optional().default(""),
 });
 
-const authorFieldsSchema = z.object({
+export const authorFieldsSchema = z.object({
   name: z.string().min(2).max(120),
   slug: z
     .string()
@@ -49,23 +50,35 @@ const authorFieldsSchema = z.object({
   published: z.boolean().optional().default(true),
 });
 
-export const authorSchema = authorFieldsSchema.transform((data) => ({
-  ...data,
-  mainBooks: bookLinksToStorage(data.mainBooks),
-  readingOrder: bookLinksToStorage(data.readingOrder),
-}));
-
-export const authorUpdateSchema = authorFieldsSchema
-  .partial()
-  .transform((data) => ({
-    ...data,
-    ...(data.mainBooks !== undefined
-      ? { mainBooks: bookLinksToStorage(data.mainBooks) }
-      : {}),
-    ...(data.readingOrder !== undefined
-      ? { readingOrder: bookLinksToStorage(data.readingOrder) }
-      : {}),
-  }));
+export const authorSchema = authorFieldsSchema;
+export const authorUpdateSchema = authorFieldsSchema.partial();
 
 export type AuthorBookLinkInput = z.infer<typeof authorBookLinkSchema>;
-export type AuthorInput = z.input<typeof authorSchema>;
+export type AuthorInput = z.infer<typeof authorFieldsSchema>;
+export type AuthorUpdateInput = z.infer<typeof authorUpdateSchema>;
+
+export function toAuthorCreateData(
+  data: AuthorInput
+): Prisma.AuthorCreateInput {
+  return {
+    ...data,
+    mainBooks: bookLinksToStorage(data.mainBooks),
+    readingOrder: bookLinksToStorage(data.readingOrder),
+  };
+}
+
+export function toAuthorUpdateData(
+  data: AuthorUpdateInput
+): Prisma.AuthorUpdateInput {
+  const { mainBooks, readingOrder, ...rest } = data;
+
+  return {
+    ...rest,
+    ...(mainBooks !== undefined
+      ? { mainBooks: bookLinksToStorage(mainBooks) }
+      : {}),
+    ...(readingOrder !== undefined
+      ? { readingOrder: bookLinksToStorage(readingOrder) }
+      : {}),
+  };
+}

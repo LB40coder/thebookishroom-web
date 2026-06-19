@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
-import { authorSchema } from "@/lib/validations/author";
+import { authorSchema, toAuthorCreateData } from "@/lib/validations/author";
 import { apiError, logApiRequest, parseJsonBody } from "@/lib/api/helpers";
 
 export const runtime = "nodejs";
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     });
     if (existing) return apiError("Slug already exists", 409);
 
-    const author = await prisma.author.create({ data: parsed.data });
+    const author = await prisma.author.create({ data: toAuthorCreateData(parsed.data) });
     await logApiRequest(request, 201);
     return NextResponse.json({ data: author }, { status: 201 });
   } catch {

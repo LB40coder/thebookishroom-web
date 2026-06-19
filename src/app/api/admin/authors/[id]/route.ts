@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
-import { authorUpdateSchema } from "@/lib/validations/author";
+import { authorUpdateSchema, toAuthorUpdateData } from "@/lib/validations/author";
 import { apiError, parseJsonBody } from "@/lib/api/helpers";
 
 export const runtime = "nodejs";
@@ -34,7 +34,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const author = await prisma.author.update({
       where: { id },
-      data: parsed.data,
+      data: toAuthorUpdateData(parsed.data),
     });
     return NextResponse.json({ data: author });
   } catch {
