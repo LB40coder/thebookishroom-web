@@ -34,6 +34,14 @@ function extensionForMime(mimeType: string): string {
   return map[mimeType] ?? ".bin";
 }
 
+function shouldTryBlobUpload(): boolean {
+  return Boolean(
+    process.env.VERCEL ||
+      process.env.BLOB_READ_WRITE_TOKEN ||
+      process.env.BLOB_STORE_ID
+  );
+}
+
 export async function uploadImage(file: File): Promise<{
   url: string;
   filename: string;
@@ -45,27 +53,34 @@ export async function uploadImage(file: File): Promise<{
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const storedName = `${crypto.randomUUID()}${extensionForMime(file.type)}`;
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+  const blobPath = `media/${storedName}`;
 
-  if (blobToken) {
-    const blob = await put(`media/${storedName}`, buffer, {
-      access: "public",
-      contentType: file.type,
-      addRandomSuffix: false,
-      token: blobToken,
-    });
-    return {
-      url: blob.url,
-      filename: file.name,
-      mimeType: file.type,
-      size: buffer.length,
-    };
-  }
+  if (shouldTryBlobUpload()) {
+    try {
+      // Let the SDK pick OIDC (BLOB_STORE_ID + VERCEL_OIDC_TOKEN) or
+      // BLOB_READ_WRITE_TOKEN — do not pass token manually.
+      const blob = await put(blobPath, buffer, {
+        access: "public",
+        contentType: file.type,
+        addRandomSuffix: false,
+      });
 
-  if (process.env.VERCEL) {
-    throw new Error(
-      "Uploads on Vercel require Blob storage. In the Vercel dashboard go to Storage → Create Blob → Connect to this project, then redeploy."
-    );
+      return {
+        url: blob.url,
+        filename: file.name,
+        mimeType: file.type,
+        size: buffer.length,
+      };
+    } catch (error) {
+      const detail =
+        error instanceof Error ? error.message : "Unknown blob upload error";
+
+      throw new Error(
+        process.env.VERCEL
+          ? `Blob upload failed: ${detail}. In Vercel, open Storage → your Blob store → Projects and confirm this project is connected, then redeploy.`
+          : `Blob upload failed: ${detail}. Run "vercel env pull" for local Blob access.`
+      );
+    }
   }
 
   const year = new Date().getFullYear().toString();
