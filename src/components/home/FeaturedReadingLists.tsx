@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { posts } from "@/lib/data/posts";
+import { getPublishedPosts } from "@/lib/data/posts";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CoverImage } from "@/components/ui/CoverImage";
 
-export function FeaturedReadingLists() {
-  const featured = posts.slice(0, 3);
+export async function FeaturedReadingLists() {
+  const featured = await getPublishedPosts({ limit: 3 });
+
+  if (featured.length === 0) return null;
 
   return (
     <section className="section-padding">

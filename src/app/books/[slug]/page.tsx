@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getBookBySlug, getBooksBySlugs, getBookSlugs } from "@/lib/data/books";
 import { getAuthorBySlug } from "@/lib/data/authors";
-import { posts } from "@/lib/data/posts";
+import { getPostsByRelatedBook } from "@/lib/data/posts";
 import { stripHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { BuyOnAmazon } from "@/components/books/BuyOnAmazon";
@@ -45,19 +45,16 @@ export default async function BookPage({ params }: PageProps) {
   const book = await getBookBySlug(slug);
   if (!book) notFound();
 
-  const [author, similarBooks] = await Promise.all([
+  const [author, similarBooks, relatedPosts] = await Promise.all([
     getAuthorBySlug(book.authorSlug),
     getBooksBySlugs(book.similarBooks),
+    getPostsByRelatedBook(book.slug),
   ]);
 
   const similarBySlug = new Map(similarBooks.map((b) => [b.slug, b]));
   const orderedSimilarBooks = book.similarBooks
     .map((s) => similarBySlug.get(s))
     .filter(Boolean);
-
-  const relatedPosts = posts.filter((p) =>
-    p.relatedBooks.includes(book.slug)
-  );
 
   return (
     <div className="section-padding">

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { postUpdateSchema } from "@/lib/validations/post";
 import { apiError, logApiRequest, parseJsonBody } from "@/lib/api/helpers";
+import { revalidatePostPages } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -64,6 +65,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       },
     });
 
+    revalidatePostPages(post.slug);
     await logApiRequest(request, 200);
     return NextResponse.json({ data: post });
   } catch {
@@ -83,6 +85,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     if (!existing) return apiError("Not found", 404);
 
     await prisma.post.delete({ where: { id: existing.id } });
+    revalidatePostPages(existing.slug);
     await logApiRequest(request, 200);
     return NextResponse.json({ success: true });
   } catch {

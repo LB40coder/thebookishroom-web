@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getMoods } from "@/lib/data/moods";
-import { getPostsByMood } from "@/lib/data/posts";
+import { getPublishedPosts } from "@/lib/data/posts";
 import { getMoodIcon } from "@/lib/icons/mood-icons";
 import { PostCard } from "@/components/cards/PostCard";
 
@@ -14,7 +14,17 @@ export const metadata: Metadata = {
 };
 
 export default async function BookMoodsPage() {
-  const moods = await getMoods();
+  const [moods, allPosts] = await Promise.all([
+    getMoods(),
+    getPublishedPosts(),
+  ]);
+
+  const postCountByMood = new Map<string, number>();
+  for (const post of allPosts) {
+    for (const mood of post.moods) {
+      postCountByMood.set(mood, (postCountByMood.get(mood) ?? 0) + 1);
+    }
+  }
 
   return (
     <div className="section-padding">
@@ -32,7 +42,7 @@ export default async function BookMoodsPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {moods.map((mood) => {
             const Icon = getMoodIcon(mood.icon);
-            const moodPosts = getPostsByMood(mood.slug);
+            const moodPostCount = postCountByMood.get(mood.slug) ?? 0;
             return (
               <Link
                 key={mood.slug}
@@ -48,9 +58,9 @@ export default async function BookMoodsPage() {
                 <p className="mt-2 text-sm text-coffee leading-relaxed">
                   {mood.description}
                 </p>
-                {moodPosts.length > 0 && (
+                {moodPostCount > 0 && (
                   <p className="mt-3 text-xs text-burgundy font-medium">
-                    {moodPosts.length} reading {moodPosts.length === 1 ? "list" : "lists"}
+                    {moodPostCount} reading {moodPostCount === 1 ? "list" : "lists"}
                   </p>
                 )}
               </Link>

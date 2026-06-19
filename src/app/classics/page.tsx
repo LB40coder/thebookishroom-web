@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { classicGuides } from "@/lib/data/posts";
+import { classicGuides } from "@/lib/data/classics-content";
 import { Button } from "@/components/ui/Button";
 import { CoverImage } from "@/components/ui/CoverImage";
 
@@ -60,7 +60,7 @@ export default function ClassicsPage() {
           {guides.map((guide) => (
             <Link
               key={guide.slug}
-              href={`/reading-lists/${guide.slug}`}
+              href="/reading-lists"
               className="group flex items-center gap-4 p-4 bg-cream rounded-sm border border-coffee/10 hover:border-coffee/25 transition-colors"
             >
               <div className="relative w-16 h-16 rounded-sm overflow-hidden shrink-0">

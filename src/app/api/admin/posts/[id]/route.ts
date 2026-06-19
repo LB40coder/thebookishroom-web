@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { postUpdateSchema } from "@/lib/validations/post";
 import { apiError, parseJsonBody } from "@/lib/api/helpers";
+import { revalidatePostPages } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -29,6 +30,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       where: { id },
       data: parsed.data,
     });
+    revalidatePostPages(post.slug);
     return NextResponse.json({ data: post });
   } catch {
     return apiError("Not found", 404);
@@ -41,7 +43,11 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   const { id } = await params;
 
   try {
+    const existing = await prisma.post.findUnique({ where: { id } });
+    if (!existing) return apiError("Not found", 404);
+
     await prisma.post.delete({ where: { id } });
+    revalidatePostPages(existing.slug);
     return NextResponse.json({ success: true });
   } catch {
     return apiError("Not found", 404);

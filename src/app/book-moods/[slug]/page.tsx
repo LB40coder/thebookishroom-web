@@ -35,8 +35,10 @@ export default async function MoodPage({ params }: PageProps) {
   const mood = await getMoodBySlug(slug);
   if (!mood) notFound();
 
-  const moodPosts = getPostsByMood(slug);
-  const moodBooks = await filterPublishedBooks({ mood: slug });
+  const [moodPosts, moodBooks] = await Promise.all([
+    getPostsByMood(slug),
+    filterPublishedBooks({ mood: slug }),
+  ]);
 
   return (
     <div className="section-padding">

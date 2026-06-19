@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { postSchema, postUpdateSchema } from "@/lib/validations/post";
 import { apiError, parseJsonBody } from "@/lib/api/helpers";
+import { revalidatePostPages } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
           : new Date(),
       },
     });
+    revalidatePostPages(post.slug);
     return NextResponse.json({ data: post }, { status: 201 });
   } catch {
     return apiError("Internal server error", 500);

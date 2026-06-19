@@ -1,11 +1,18 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { articles } from "@/lib/data/posts";
+import { getPublishedPosts } from "@/lib/data/posts";
 import { formatDate } from "@/lib/utils";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { CoverImage } from "@/components/ui/CoverImage";
 
-export function LatestArticles() {
+export async function LatestArticles() {
+  const articles = await getPublishedPosts({
+    category: "Reading Tips",
+    limit: 4,
+  });
+
+  if (articles.length === 0) return null;
+
   return (
     <section className="section-padding bg-cream-dark/50">
       <div className="section-container">

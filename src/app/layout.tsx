@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { getTrendingPosts } from "@/lib/data/posts";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -50,18 +51,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const trendingPosts = await getTrendingPosts();
+
   return (
     <html
       lang="en"
       className={`${playfair.variable} ${inter.variable} ${lora.variable}`}
     >
       <body className="min-h-screen flex flex-col">
-        <AnnouncementBar />
+        <AnnouncementBar posts={trendingPosts} />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

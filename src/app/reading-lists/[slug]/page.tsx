@@ -2,26 +2,23 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Clock, ArrowLeft } from "lucide-react";
-import { getPostBySlug, posts } from "@/lib/data/posts";
+import { getPostBySlug, getPublishedPosts } from "@/lib/data/posts";
 import { getBooksBySlugs } from "@/lib/data/books";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 import { CoverImage } from "@/components/ui/CoverImage";
+import { RichTextContent } from "@/components/ui/RichTextContent";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return posts.map((post) => ({ slug: post.slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
 
   return {
@@ -37,14 +34,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
-  const relatedBooks = await getBooksBySlugs(post.relatedBooks);
-
-  const relatedPosts = posts
-    .filter((p) => p.slug !== post.slug)
-    .slice(0, 3);
+  const [relatedBooks, relatedPosts] = await Promise.all([
+    getBooksBySlugs(post.relatedBooks),
+    getPublishedPosts({ excludeSlug: slug, limit: 3 }),
+  ]);
 
   return (
     <>
@@ -97,17 +93,10 @@ export default async function PostPage({ params }: PageProps) {
             ))}
           </div>
 
-          <div className="prose-reading font-reading text-ink/90 leading-relaxed space-y-4">
-            <p>
-              This reading list is coming soon. We&apos;re carefully curating
-              each recommendation to help you discover books that match this
-              theme perfectly.
-            </p>
-            <p className="text-coffee text-sm italic">
-              Content will be added in a future update. In the meantime, explore
-              the related books below.
-            </p>
-          </div>
+          <RichTextContent
+            html={post.content}
+            className="font-reading text-ink/90 leading-relaxed space-y-4"
+          />
 
           {relatedBooks.length > 0 && (
             <section className="mt-12 pt-8 border-t border-coffee/10">
@@ -117,23 +106,24 @@ export default async function PostPage({ params }: PageProps) {
               <div className="space-y-6">
                 {relatedBooks.map((book) => (
                   <div
-                    key={book!.slug}
+                    key={book.slug}
                     className="p-5 bg-cream-dark/50 rounded-sm border border-coffee/10"
                   >
                     <h3 className="font-serif text-lg text-ink">
-                      {book!.title}
+                      {book.title}
                     </h3>
                     <p className="text-sm text-coffee">
-                      by {book!.author} · {book!.year}
+                      by {book.author} · {book.year}
                     </p>
-                    <p className="mt-2 text-sm text-coffee leading-relaxed">
-                      {book!.description}
-                    </p>
+                    <RichTextContent
+                      html={book.description}
+                      className="mt-2 text-sm text-coffee leading-relaxed line-clamp-3"
+                    />
                     <div className="mt-3 flex flex-wrap gap-2">
                       <span className="text-[10px] uppercase tracking-wider text-forest bg-forest/5 px-2 py-0.5 rounded-sm">
-                        {book!.difficulty}
+                        {book.difficulty}
                       </span>
-                      {book!.moods.map((m) => (
+                      {book.moods.map((m) => (
                         <span
                           key={m}
                           className="text-[10px] uppercase tracking-wider text-burgundy bg-burgundy/5 px-2 py-0.5 rounded-sm"
@@ -143,7 +133,7 @@ export default async function PostPage({ params }: PageProps) {
                       ))}
                     </div>
                     <Button
-                      href={`/books/${book!.slug}`}
+                      href={`/books/${book.slug}`}
                       variant="outline"
                       className="mt-4 text-xs"
                     >

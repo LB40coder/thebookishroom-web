@@ -3,33 +3,36 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { TrendingUp } from "lucide-react";
-import { getTrendingPosts } from "@/lib/data/posts";
+import type { Post } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const trendingPosts = getTrendingPosts();
 const SLIDE_INTERVAL = 4500;
 
-export function AnnouncementBar() {
+interface AnnouncementBarProps {
+  posts: Pick<Post, "slug" | "title">[];
+}
+
+export function AnnouncementBar({ posts }: AnnouncementBarProps) {
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    if (trendingPosts.length <= 1) return;
+    if (posts.length <= 1) return;
 
     const interval = setInterval(() => {
       setIsAnimating(true);
       setTimeout(() => {
-        setCurrent((prev) => (prev + 1) % trendingPosts.length);
+        setCurrent((prev) => (prev + 1) % posts.length);
         setIsAnimating(false);
       }, 300);
     }, SLIDE_INTERVAL);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [posts.length]);
 
-  if (trendingPosts.length === 0) return null;
+  if (posts.length === 0) return null;
 
-  const post = trendingPosts[current];
+  const post = posts[current];
 
   return (
     <div className="bg-forest text-cream text-xs sm:text-sm py-2.5">
@@ -55,9 +58,9 @@ export function AnnouncementBar() {
           </Link>
         </div>
 
-        {trendingPosts.length > 1 && (
+        {posts.length > 1 && (
           <div className="hidden sm:flex items-center gap-1 shrink-0">
-            {trendingPosts.map((_, i) => (
+            {posts.map((_, i) => (
               <button
                 key={i}
                 onClick={() => {

@@ -3,6 +3,7 @@ import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { postSchema } from "@/lib/validations/post";
 import { apiError, logApiRequest, parseJsonBody } from "@/lib/api/helpers";
 import { rateLimit, getClientIp } from "@/lib/auth/rate-limit";
+import { revalidatePostPages } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
       },
     });
 
+    revalidatePostPages(post.slug);
     await logApiRequest(request, 201);
     return NextResponse.json({ data: post }, { status: 201 });
   } catch {
