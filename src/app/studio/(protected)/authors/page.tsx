@@ -2,6 +2,7 @@ import Link from "next/link";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
+import { StudioRowActions } from "@/components/admin/StudioRowActions";
 
 export default async function AdminAuthorsPage() {
   const adminPath = getAdminPath();
@@ -41,12 +42,11 @@ export default async function AdminAuthorsPage() {
                   <td className="px-4 py-3 text-ink">{author.name}</td>
                   <td className="px-4 py-3 text-coffee hidden sm:table-cell">{author.nationality}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/${adminPath}/authors/${author.id}`}
-                      className="text-burgundy hover:underline text-xs"
-                    >
-                      Edit
-                    </Link>
+                    <StudioRowActions
+                      editHref={`/${adminPath}/authors/${author.id}`}
+                      viewHref={author.published ? `/authors/${author.slug}` : undefined}
+                      viewLabel="View author"
+                    />
                   </td>
                 </tr>
               ))}

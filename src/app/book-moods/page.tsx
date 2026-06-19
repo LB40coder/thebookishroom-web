@@ -1,17 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  GraduationCap,
-  Coffee,
-  Castle,
-  Heart,
-  CloudRain,
-  Sparkles,
-  BookOpen,
-  Search,
-} from "lucide-react";
 import { getMoods } from "@/lib/data/moods";
 import { getPostsByMood } from "@/lib/data/posts";
+import { getMoodIcon } from "@/lib/icons/mood-icons";
 import { PostCard } from "@/components/cards/PostCard";
 
 export const revalidate = 86400;
@@ -20,17 +11,6 @@ export const metadata: Metadata = {
   title: "Book Moods",
   description:
     "Discover books by mood — from dark academia and gothic to cozy and romantic. Find reads that match how you feel.",
-};
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  "graduation-cap": GraduationCap,
-  coffee: Coffee,
-  castle: Castle,
-  heart: Heart,
-  "cloud-rain": CloudRain,
-  sparkles: Sparkles,
-  "book-open": BookOpen,
-  search: Search,
 };
 
 export default async function BookMoodsPage() {
@@ -51,7 +31,7 @@ export default async function BookMoodsPage() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {moods.map((mood) => {
-            const Icon = iconMap[mood.icon] || BookOpen;
+            const Icon = getMoodIcon(mood.icon);
             const moodPosts = getPostsByMood(mood.slug);
             return (
               <Link

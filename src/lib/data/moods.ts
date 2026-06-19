@@ -23,7 +23,6 @@ export async function ensureDefaultMoodsSeeded(): Promise<void> {
         update: {
           name: mood.name,
           description: mood.description,
-          icon: mood.icon,
         },
       })
     )
@@ -65,6 +64,22 @@ export async function createMood(input: {
       description: input.description ?? "",
       icon: input.icon ?? "book-open",
     },
+  });
+
+  return toMood(row);
+}
+
+export async function updateMood(
+  id: string,
+  input: {
+    name?: string;
+    description?: string;
+    icon?: string;
+  }
+): Promise<Mood> {
+  const row = await prisma.mood.update({
+    where: { id },
+    data: input,
   });
 
   return toMood(row);

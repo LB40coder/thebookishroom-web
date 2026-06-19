@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { books } from "@/lib/data/books";
+import { getPublishedBooks } from "@/lib/data/books";
 import { BookCard } from "@/components/cards/BookCard";
 
 export const revalidate = 86400;
@@ -10,7 +10,9 @@ export const metadata: Metadata = {
     "Explore individual book pages with editorial details, reading difficulty, moods, and similar book recommendations.",
 };
 
-export default function BooksPage() {
+export default async function BooksPage() {
+  const books = await getPublishedBooks();
+
   return (
     <div className="section-padding">
       <div className="section-container">
@@ -22,11 +24,15 @@ export default function BooksPage() {
           </p>
         </header>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {books.map((book) => (
-            <BookCard key={book.slug} book={book} />
-          ))}
-        </div>
+        {books.length === 0 ? (
+          <p className="text-coffee">Book pages are coming soon.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {books.map((book) => (
+              <BookCard key={book.slug} book={book} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

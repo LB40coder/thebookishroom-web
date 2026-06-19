@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Clock, ArrowLeft } from "lucide-react";
 import { getPostBySlug, posts } from "@/lib/data/posts";
-import { getBookBySlug } from "@/lib/data/books";
+import { getBooksBySlugs } from "@/lib/data/books";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
@@ -40,9 +40,7 @@ export default async function PostPage({ params }: PageProps) {
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
-  const relatedBooks = post.relatedBooks
-    .map((bookSlug) => getBookBySlug(bookSlug))
-    .filter(Boolean);
+  const relatedBooks = await getBooksBySlugs(post.relatedBooks);
 
   const relatedPosts = posts
     .filter((p) => p.slug !== post.slug)

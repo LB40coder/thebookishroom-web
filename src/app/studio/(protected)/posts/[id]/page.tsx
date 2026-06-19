@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
 import { PostForm } from "@/components/admin/PostForm";
+import { StudioEditHeader } from "@/components/admin/StudioEditHeader";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -20,7 +21,11 @@ export default async function EditPostPage({ params }: PageProps) {
 
   return (
     <div>
-      <h1 className="font-serif text-2xl text-ink mb-6">Edit Post</h1>
+      <StudioEditHeader
+        title="Edit Post"
+        viewHref={post.published ? `/reading-lists/${post.slug}` : undefined}
+        viewLabel="View post"
+      />
       <PostForm adminPath={adminPath} post={post} />
     </div>
   );

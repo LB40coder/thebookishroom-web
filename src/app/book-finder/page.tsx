@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { filterBooks } from "@/lib/data/books";
+import type { Book } from "@/lib/types";
 import { BookCard } from "@/components/cards/BookCard";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 
@@ -40,7 +40,27 @@ const filterOptions = {
   ],
 };
 
+function filterBooks(
+  books: Book[],
+  filters: {
+    mood?: string;
+    genre?: string;
+    length?: string;
+    difficulty?: string;
+  }
+): Book[] {
+  return books.filter((book) => {
+    if (filters.mood && !book.moods.includes(filters.mood)) return false;
+    if (filters.genre && !book.genres.includes(filters.genre)) return false;
+    if (filters.length && book.length !== filters.length) return false;
+    if (filters.difficulty && book.difficulty !== filters.difficulty)
+      return false;
+    return true;
+  });
+}
+
 export default function BookFinderPage() {
+  const [books, setBooks] = useState<Book[]>([]);
   const [filters, setFilters] = useState({
     mood: "",
     genre: "",
@@ -49,14 +69,25 @@ export default function BookFinderPage() {
   });
   const [hasSearched, setHasSearched] = useState(false);
 
-  const results = hasSearched
-    ? filterBooks({
-        mood: filters.mood || undefined,
-        genre: filters.genre || undefined,
-        length: filters.length || undefined,
-        difficulty: filters.difficulty || undefined,
-      })
-    : [];
+  useEffect(() => {
+    fetch("/api/books")
+      .then((res) => res.json())
+      .then((json) => setBooks(json.data ?? []))
+      .catch(() => setBooks([]));
+  }, []);
+
+  const results = useMemo(
+    () =>
+      hasSearched
+        ? filterBooks(books, {
+            mood: filters.mood || undefined,
+            genre: filters.genre || undefined,
+            length: filters.length || undefined,
+            difficulty: filters.difficulty || undefined,
+          })
+        : [],
+    [books, filters, hasSearched]
+  );
 
   function handleSearch() {
     setHasSearched(true);

@@ -4,6 +4,7 @@ import { getGenres } from "@/lib/data/genres";
 import { getMoods } from "@/lib/data/moods";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
 import { BookForm } from "@/components/admin/BookForm";
+import { StudioEditHeader } from "@/components/admin/StudioEditHeader";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -34,7 +35,11 @@ export default async function EditBookPage({ params }: PageProps) {
 
   return (
     <div>
-      <h1 className="font-serif text-2xl text-ink mb-6">Edit Book</h1>
+      <StudioEditHeader
+        title="Edit Book"
+        viewHref={book.published ? `/books/${book.slug}` : undefined}
+        viewLabel="View book"
+      />
       <BookForm
         adminPath={adminPath}
         book={book}

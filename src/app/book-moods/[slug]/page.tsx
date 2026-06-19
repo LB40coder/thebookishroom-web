@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { getMoodBySlug } from "@/lib/data/moods";
 import { DEFAULT_MOODS } from "@/lib/data/taxonomy-defaults";
 import { getPostsByMood } from "@/lib/data/posts";
-import { filterBooks } from "@/lib/data/books";
+import { filterPublishedBooks } from "@/lib/data/books";
 import { PostCard } from "@/components/cards/PostCard";
 import { BookCard } from "@/components/cards/BookCard";
 
@@ -36,7 +36,7 @@ export default async function MoodPage({ params }: PageProps) {
   if (!mood) notFound();
 
   const moodPosts = getPostsByMood(slug);
-  const moodBooks = filterBooks({ mood: slug });
+  const moodBooks = await filterPublishedBooks({ mood: slug });
 
   return (
     <div className="section-padding">

@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { books, getBookBySlug } from "@/lib/data/books";
+import { getBookBySlug, getBooksBySlugs, getBookSlugs } from "@/lib/data/books";
 import { getAuthorBySlug } from "@/lib/data/authors";
 import { posts } from "@/lib/data/posts";
+import { stripHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { BuyOnAmazon } from "@/components/books/BuyOnAmazon";
 import { CoverImage } from "@/components/ui/CoverImage";
@@ -17,20 +18,23 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  return books.map((book) => ({ slug: book.slug }));
+  const slugs = await getBookSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const book = getBookBySlug(slug);
+  const book = await getBookBySlug(slug);
   if (!book) return { title: "Book Not Found" };
+
+  const description = stripHtml(book.description).slice(0, 160);
 
   return {
     title: `${book.title} by ${book.author}`,
-    description: book.description,
+    description,
     openGraph: {
       title: `${book.title} by ${book.author}`,
-      description: book.description,
+      description,
       images: book.coverImage ? [{ url: book.coverImage }] : undefined,
     },
   };
@@ -38,13 +42,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BookPage({ params }: PageProps) {
   const { slug } = await params;
-  const book = getBookBySlug(slug);
+  const book = await getBookBySlug(slug);
   if (!book) notFound();
 
-  const author = await getAuthorBySlug(book.authorSlug);
-  const similarBooks = book.similarBooks
-    .map((s) => getBookBySlug(s))
+  const [author, similarBooks] = await Promise.all([
+    getAuthorBySlug(book.authorSlug),
+    getBooksBySlugs(book.similarBooks),
+  ]);
+
+  const similarBySlug = new Map(similarBooks.map((b) => [b.slug, b]));
+  const orderedSimilarBooks = book.similarBooks
+    .map((s) => similarBySlug.get(s))
     .filter(Boolean);
+
   const relatedPosts = posts.filter((p) =>
     p.relatedBooks.includes(book.slug)
   );
@@ -161,7 +171,7 @@ export default async function BookPage({ params }: PageProps) {
               <section className="mt-8 p-5 bg-cream-dark/50 rounded-sm border border-coffee/10">
                 <h2 className="font-serif text-lg text-ink mb-2">About the Author</h2>
                 <p className="text-sm text-coffee leading-relaxed line-clamp-3">
-                  {author.bio}
+                  {stripHtml(author.bio)}
                 </p>
                 <Button
                   href={`/authors/${author.slug}`}
@@ -173,11 +183,11 @@ export default async function BookPage({ params }: PageProps) {
               </section>
             )}
 
-            {similarBooks.length > 0 && (
+            {orderedSimilarBooks.length > 0 && (
               <section className="mt-10 pt-8 border-t border-coffee/10">
                 <h2 className="font-serif text-xl text-ink mb-4">Similar Books</h2>
                 <ul className="space-y-2">
-                  {similarBooks.map((b) => (
+                  {orderedSimilarBooks.map((b) => (
                     <li key={b!.slug}>
                       <Link
                         href={`/books/${b!.slug}`}

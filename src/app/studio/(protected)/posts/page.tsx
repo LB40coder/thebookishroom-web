@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
+import { StudioRowActions } from "@/components/admin/StudioRowActions";
 
 export default async function AdminPostsPage() {
   const adminPath = getAdminPath();
@@ -55,12 +56,13 @@ export default async function AdminPostsPage() {
                     {post.views}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/${adminPath}/posts/${post.id}`}
-                      className="text-burgundy hover:underline text-xs"
-                    >
-                      Edit
-                    </Link>
+                    <StudioRowActions
+                      editHref={`/${adminPath}/posts/${post.id}`}
+                      viewHref={
+                        post.published ? `/reading-lists/${post.slug}` : undefined
+                      }
+                      viewLabel="View post"
+                    />
                   </td>
                 </tr>
               ))}
