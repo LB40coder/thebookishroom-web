@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { moods } from "@/lib/data/moods";
+import { getMoods } from "@/lib/data/moods";
 import { getPublishedAuthors } from "@/lib/data/authors";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { stripHtml } from "@/lib/utils";
@@ -70,6 +70,8 @@ export async function GET(request: Request) {
       }
     }
   }
+
+  const moods = await getMoods();
 
   for (const mood of moods) {
     const matches =

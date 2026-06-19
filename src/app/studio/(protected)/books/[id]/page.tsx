@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
+import { getGenres } from "@/lib/data/genres";
+import { getMoods } from "@/lib/data/moods";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
 import { BookForm } from "@/components/admin/BookForm";
 
@@ -14,7 +16,7 @@ export default async function EditBookPage({ params }: PageProps) {
   const { id } = await params;
   if (!isDatabaseConfigured()) notFound();
 
-  const [book, authors, allBooks] = await Promise.all([
+  const [book, authors, allBooks, genres, moods] = await Promise.all([
     prisma.book.findUnique({ where: { id } }),
     prisma.author.findMany({
       orderBy: { name: "asc" },
@@ -24,6 +26,8 @@ export default async function EditBookPage({ params }: PageProps) {
       orderBy: { title: "asc" },
       select: { id: true, title: true, slug: true, author: true },
     }),
+    getGenres(),
+    getMoods(),
   ]);
 
   if (!book) notFound();
@@ -36,6 +40,8 @@ export default async function EditBookPage({ params }: PageProps) {
         book={book}
         authors={authors}
         allBooks={allBooks}
+        genres={genres}
+        moods={moods}
       />
     </div>
   );

@@ -10,7 +10,7 @@ import {
   BookOpen,
   Search,
 } from "lucide-react";
-import { moods } from "@/lib/data/moods";
+import { getMoods } from "@/lib/data/moods";
 import { getPostsByMood } from "@/lib/data/posts";
 import { PostCard } from "@/components/cards/PostCard";
 
@@ -33,7 +33,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   search: Search,
 };
 
-export default function BookMoodsPage() {
+export default async function BookMoodsPage() {
+  const moods = await getMoods();
+
   return (
     <div className="section-padding">
       <div className="section-container">

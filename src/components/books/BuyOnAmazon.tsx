@@ -1,7 +1,6 @@
 import { ExternalLink } from "lucide-react";
+import { AMAZON_LANGUAGE_ORDER } from "@/lib/books/amazon-editions";
 import type { AmazonEdition } from "@/lib/types";
-
-const languageOrder = { en: 0, pt: 1, es: 2 } as const;
 
 interface BuyOnAmazonProps {
   editions: AmazonEdition[];
@@ -11,15 +10,16 @@ export function BuyOnAmazon({ editions }: BuyOnAmazonProps) {
   if (!editions.length) return null;
 
   const sorted = [...editions].sort(
-    (a, b) => languageOrder[a.language] - languageOrder[b.language]
+    (a, b) =>
+      AMAZON_LANGUAGE_ORDER[a.language] - AMAZON_LANGUAGE_ORDER[b.language]
   );
 
   return (
     <section className="mt-6 p-4 bg-cream-dark/50 rounded-sm border border-coffee/10">
       <h2 className="font-serif text-base text-ink mb-3">Buy on Amazon</h2>
       <ul className="space-y-2">
-        {sorted.map((edition) => (
-          <li key={edition.language}>
+        {sorted.map((edition, index) => (
+          <li key={`${edition.language}-${index}`}>
             <a
               href={edition.url}
               target="_blank"

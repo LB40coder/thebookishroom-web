@@ -1,6 +1,6 @@
 export type Difficulty = "beginner" | "intermediate" | "advanced";
 export type Length = "short" | "medium" | "long";
-export type BookLanguage = "en" | "pt" | "es";
+export type BookLanguage = "en" | "pt" | "es" | "de" | "fr" | "it";
 
 export interface AmazonEdition {
   language: BookLanguage;
@@ -46,6 +46,11 @@ export interface Book {
   coverImage?: string;
 }
 
+export interface AuthorBookLink {
+  title: string;
+  url: string;
+}
+
 export interface Author {
   name: string;
   slug: string;
@@ -53,10 +58,15 @@ export interface Author {
   nationality: string;
   birthYear?: number;
   deathYear?: number;
-  mainBooks: string[];
+  mainBooks: AuthorBookLink[];
   whereToStart: string;
-  readingOrder?: string[];
+  readingOrder: AuthorBookLink[];
   image?: string;
+}
+
+export interface Genre {
+  slug: string;
+  name: string;
 }
 
 export interface Mood {

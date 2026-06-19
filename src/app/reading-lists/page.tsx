@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { posts } from "@/lib/data/posts";
-import { moods } from "@/lib/data/moods";
+import { getMoods } from "@/lib/data/moods";
 import { PostCard } from "@/components/cards/PostCard";
 
 export const revalidate = 86400;
@@ -11,7 +11,9 @@ export const metadata: Metadata = {
     "Browse curated reading lists to discover your next favorite book. Lists organized by mood, genre, and aesthetic.",
 };
 
-export default function ReadingListsPage() {
+export default async function ReadingListsPage() {
+  const moods = await getMoods();
+
   return (
     <div className="section-padding">
       <div className="section-container">
@@ -38,15 +40,11 @@ export default function ReadingListsPage() {
           ))}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
             <PostCard key={post.slug} post={post} />
           ))}
         </div>
-
-        <p className="mt-10 text-center text-sm text-coffee">
-          More reading lists coming soon. Check back weekly for new recommendations.
-        </p>
       </div>
     </div>
   );

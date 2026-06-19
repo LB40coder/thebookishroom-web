@@ -12,7 +12,7 @@ const imageUrlSchema = z
   .optional();
 
 const amazonEditionSchema = z.object({
-  language: z.enum(["en", "pt", "es"]),
+  language: z.enum(["en", "pt", "es", "de", "fr", "it"]),
   label: z.string().min(2).max(80),
   url: z.string().url(),
   format: z.enum(["paperback", "kindle", "hardcover"]).optional(),
@@ -47,7 +47,7 @@ export const bookSchema = z.object({
   estimatedReadingTime: z.string().min(2).max(40),
   similarBooks: z.array(z.string()).max(20).optional().default([]),
   coverImage: imageUrlSchema,
-  amazonEditions: z.array(amazonEditionSchema).max(3).optional(),
+  amazonEditions: z.array(amazonEditionSchema).max(6).optional(),
   published: z.boolean().optional().default(true),
 });
 

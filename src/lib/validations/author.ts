@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { bookLinksToStorage } from "@/lib/authors/book-links";
 
 function htmlMinLength(min: number) {
   return (value: string) =>
@@ -11,7 +12,23 @@ const imageUrlSchema = z
   .or(z.string().startsWith("/"))
   .optional();
 
-export const authorSchema = z.object({
+const bookLinkUrlSchema = z
+  .string()
+  .max(500)
+  .refine(
+    (value) =>
+      !value ||
+      value.startsWith("/") ||
+      z.string().url().safeParse(value).success,
+    "Must be a valid URL or path starting with /"
+  );
+
+export const authorBookLinkSchema = z.object({
+  title: z.string().min(1).max(200),
+  url: bookLinkUrlSchema.optional().default(""),
+});
+
+const authorFieldsSchema = z.object({
   name: z.string().min(2).max(120),
   slug: z
     .string()
@@ -25,13 +42,30 @@ export const authorSchema = z.object({
   nationality: z.string().min(2).max(80),
   birthYear: z.number().int().min(0).max(2100).optional(),
   deathYear: z.number().int().min(0).max(2100).optional(),
-  mainBooks: z.array(z.string()).max(30).optional().default([]),
+  mainBooks: z.array(authorBookLinkSchema).max(5).optional().default([]),
   whereToStart: z.string().min(10).max(1000),
-  readingOrder: z.array(z.string()).max(30).optional().default([]),
+  readingOrder: z.array(authorBookLinkSchema).max(5).optional().default([]),
   image: imageUrlSchema,
   published: z.boolean().optional().default(true),
 });
 
-export const authorUpdateSchema = authorSchema.partial();
+export const authorSchema = authorFieldsSchema.transform((data) => ({
+  ...data,
+  mainBooks: bookLinksToStorage(data.mainBooks),
+  readingOrder: bookLinksToStorage(data.readingOrder),
+}));
 
-export type AuthorInput = z.infer<typeof authorSchema>;
+export const authorUpdateSchema = authorFieldsSchema
+  .partial()
+  .transform((data) => ({
+    ...data,
+    ...(data.mainBooks !== undefined
+      ? { mainBooks: bookLinksToStorage(data.mainBooks) }
+      : {}),
+    ...(data.readingOrder !== undefined
+      ? { readingOrder: bookLinksToStorage(data.readingOrder) }
+      : {}),
+  }));
+
+export type AuthorBookLinkInput = z.infer<typeof authorBookLinkSchema>;
+export type AuthorInput = z.input<typeof authorSchema>;

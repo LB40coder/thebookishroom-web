@@ -1,4 +1,5 @@
 import type { Author as PrismaAuthor } from "@prisma/client";
+import { parseBookLinks } from "@/lib/authors/book-links";
 import type { Author } from "@/lib/types";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 
@@ -12,9 +13,9 @@ function toAuthor(row: PrismaAuthor): Author {
     nationality: row.nationality,
     birthYear: row.birthYear ?? undefined,
     deathYear: row.deathYear ?? undefined,
-    mainBooks: row.mainBooks,
+    mainBooks: parseBookLinks(row.mainBooks),
     whereToStart: row.whereToStart,
-    readingOrder: row.readingOrder,
+    readingOrder: parseBookLinks(row.readingOrder),
     image: row.image ?? undefined,
   };
 }

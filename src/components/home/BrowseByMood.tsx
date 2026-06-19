@@ -9,7 +9,7 @@ import {
   BookOpen,
   Search,
 } from "lucide-react";
-import { moods } from "@/lib/data/moods";
+import { getMoods } from "@/lib/data/moods";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -23,7 +23,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   search: Search,
 };
 
-export function BrowseByMood() {
+export async function BrowseByMood() {
+  const moods = await getMoods();
+
   return (
     <section className="section-padding bg-cream-dark/50">
       <div className="section-container">

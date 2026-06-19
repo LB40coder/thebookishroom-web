@@ -4,7 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Book } from "@prisma/client";
 import { slugify } from "@/lib/utils";
-import { moods } from "@/lib/data/moods";
+import {
+  AMAZON_LANGUAGES,
+  createAmazonEdition,
+  editionLabelForLanguage,
+} from "@/lib/books/amazon-editions";
+import { formatGenreName } from "@/lib/data/taxonomy-defaults";
+import type { AmazonEdition, BookLanguage } from "@/lib/types";
+import { formatValidationErrors } from "@/lib/validations/errors";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageField } from "./ImageField";
 import {
@@ -13,36 +20,19 @@ import {
   selectClassName,
 } from "./form-styles";
 
-type AmazonEdition = {
-  language: "en" | "pt" | "es";
-  label: string;
-  url: string;
-  format?: "paperback" | "kindle" | "hardcover";
-};
+type AmazonEditionForm = AmazonEdition;
 
 export type AuthorOption = { name: string; slug: string };
 export type BookOption = { id: string; title: string; slug: string; author: string };
-
-const GENRE_SUGGESTIONS = [
-  "philosophy",
-  "classics",
-  "gothic",
-  "science fiction",
-  "romance",
-  "mystery",
-  "fantasy",
-  "historical fiction",
-  "literary fiction",
-  "poetry",
-  "drama",
-  "horror",
-];
+export type TaxonomyOption = { slug: string; name: string };
 
 interface BookFormProps {
   adminPath: string;
   book?: Book;
   authors: AuthorOption[];
   allBooks: BookOption[];
+  genres: TaxonomyOption[];
+  moods: TaxonomyOption[];
 }
 
 function FormSection({
@@ -72,15 +62,40 @@ export function BookForm({
   book,
   authors,
   allBooks,
+  genres: initialGenres,
+  moods: initialMoods,
 }: BookFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [genreOptions, setGenreOptions] = useState(() => {
+    const bySlug = new Map(initialGenres.map((genre) => [genre.slug, genre]));
+    for (const slug of book?.genres ?? []) {
+      if (!bySlug.has(slug)) {
+        bySlug.set(slug, { slug, name: formatGenreName(slug) });
+      }
+    }
+    return [...bySlug.values()].sort((a, b) => a.name.localeCompare(b.name));
+  });
+  const [moodOptions, setMoodOptions] = useState(() => {
+    const bySlug = new Map(initialMoods.map((mood) => [mood.slug, mood]));
+    for (const slug of book?.moods ?? []) {
+      if (!bySlug.has(slug)) {
+        bySlug.set(slug, { slug, name: formatGenreName(slug) });
+      }
+    }
+    return [...bySlug.values()].sort((a, b) => a.name.localeCompare(b.name));
+  });
+  const [newGenreName, setNewGenreName] = useState("");
+  const [newMoodName, setNewMoodName] = useState("");
+  const [creatingGenre, setCreatingGenre] = useState(false);
+  const [creatingMood, setCreatingMood] = useState(false);
   const [customAuthor, setCustomAuthor] = useState(
     () => !authors.some((a) => a.slug === book?.authorSlug)
   );
 
-  const initialEditions = (book?.amazonEditions as AmazonEdition[] | null) ?? [];
+  const initialEditions =
+    (book?.amazonEditions as AmazonEditionForm[] | null) ?? [];
 
   const [form, setForm] = useState({
     title: book?.title ?? "",
@@ -88,7 +103,7 @@ export function BookForm({
     author: book?.author ?? "",
     authorSlug: book?.authorSlug ?? "",
     year: book?.year ?? new Date().getFullYear(),
-    genres: book?.genres.join(", ") ?? "",
+    genres: book?.genres ?? ([] as string[]),
     moods: book?.moods ?? ([] as string[]),
     difficulty: book?.difficulty ?? "intermediate",
     length: book?.length ?? "medium",
@@ -101,7 +116,7 @@ export function BookForm({
     published: book?.published ?? true,
   });
 
-  const [editions, setEditions] = useState<AmazonEdition[]>(initialEditions);
+  const [editions, setEditions] = useState<AmazonEditionForm[]>(initialEditions);
 
   const similarBookOptions = allBooks.filter((b) => b.id !== book?.id);
 
@@ -133,6 +148,15 @@ export function BookForm({
     }
   }
 
+  function toggleGenre(slug: string) {
+    setForm((prev) => ({
+      ...prev,
+      genres: prev.genres.includes(slug)
+        ? prev.genres.filter((g) => g !== slug)
+        : [...prev.genres, slug],
+    }));
+  }
+
   function toggleMood(slug: string) {
     setForm((prev) => ({
       ...prev,
@@ -151,26 +175,92 @@ export function BookForm({
     }));
   }
 
-  function addGenre(genre: string) {
-    const current = form.genres
-      .split(",")
-      .map((g) => g.trim())
-      .filter(Boolean);
-    if (!current.includes(genre)) {
-      update("genres", [...current, genre].join(", "));
+  async function handleCreateGenre() {
+    const name = newGenreName.trim();
+    if (!name) return;
+
+    setCreatingGenre(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/admin/genres", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(formatValidationErrors(data.details) || data.error || "Failed to create genre");
+        return;
+      }
+
+      setGenreOptions((prev) =>
+        [...prev, data.data].sort((a, b) => a.name.localeCompare(b.name))
+      );
+      toggleGenre(data.data.slug);
+      setNewGenreName("");
+    } catch {
+      setError("Failed to create genre");
+    } finally {
+      setCreatingGenre(false);
+    }
+  }
+
+  async function handleCreateMood() {
+    const name = newMoodName.trim();
+    if (!name) return;
+
+    setCreatingMood(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/admin/moods", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(formatValidationErrors(data.details) || data.error || "Failed to create mood");
+        return;
+      }
+
+      setMoodOptions((prev) =>
+        [...prev, { slug: data.data.slug, name: data.data.name }].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        )
+      );
+      toggleMood(data.data.slug);
+      setNewMoodName("");
+    } catch {
+      setError("Failed to create mood");
+    } finally {
+      setCreatingMood(false);
     }
   }
 
   function addEdition() {
-    setEditions((prev) => [
-      ...prev,
-      { language: "en", label: "English Edition", url: "https://" },
-    ]);
+    setEditions((prev) => [...prev, createAmazonEdition()]);
   }
 
-  function updateEdition(index: number, field: keyof AmazonEdition, value: string) {
+  function updateEdition(
+    index: number,
+    field: keyof AmazonEditionForm,
+    value: string
+  ) {
     setEditions((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+      prev.map((item, i) => {
+        if (i !== index) return item;
+        if (field === "language") {
+          const language = value as BookLanguage;
+          return {
+            ...item,
+            language,
+            label: editionLabelForLanguage(language),
+          };
+        }
+        return { ...item, [field]: value };
+      })
     );
   }
 
@@ -189,7 +279,7 @@ export function BookForm({
       author: form.author,
       authorSlug: form.authorSlug,
       year: Number(form.year),
-      genres: form.genres.split(",").map((g) => g.trim()).filter(Boolean),
+      genres: form.genres,
       moods: form.moods,
       difficulty: form.difficulty,
       length: form.length,
@@ -385,14 +475,16 @@ export function BookForm({
                       updateEdition(
                         index,
                         "language",
-                        e.target.value as AmazonEdition["language"]
+                        e.target.value
                       )
                     }
                     className={selectClassName}
                   >
-                    <option value="en">English</option>
-                    <option value="pt">Portuguese</option>
-                    <option value="es">Spanish</option>
+                    {AMAZON_LANGUAGES.map((language) => (
+                      <option key={language.value} value={language.value}>
+                        {language.label}
+                      </option>
+                    ))}
                   </select>
                   <select
                     value={edition.format ?? ""}
@@ -440,31 +532,45 @@ export function BookForm({
       >
         <div>
           <label className={labelClassName}>Genres</label>
-          <input
-            type="text"
-            value={form.genres}
-            onChange={(e) => update("genres", e.target.value)}
-            placeholder="philosophy, classics, gothic"
-            className={inputClassName}
-          />
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {GENRE_SUGGESTIONS.map((genre) => (
+          <div className="flex flex-wrap gap-2">
+            {genreOptions.map((genre) => (
               <button
-                key={genre}
+                key={genre.slug}
                 type="button"
-                onClick={() => addGenre(genre)}
-                className="text-[11px] px-2 py-0.5 rounded-sm border border-coffee/20 text-coffee hover:bg-cream-dark"
+                onClick={() => toggleGenre(genre.slug)}
+                className={`text-xs px-2.5 py-1 rounded-sm border transition-colors ${
+                  form.genres.includes(genre.slug)
+                    ? "bg-burgundy/10 border-burgundy/30 text-burgundy"
+                    : "border-coffee/20 text-coffee hover:bg-cream-dark"
+                }`}
               >
-                + {genre}
+                {genre.name}
               </button>
             ))}
+          </div>
+          <div className="flex gap-2 mt-3">
+            <input
+              type="text"
+              value={newGenreName}
+              onChange={(e) => setNewGenreName(e.target.value)}
+              placeholder="New genre name"
+              className={inputClassName}
+            />
+            <button
+              type="button"
+              onClick={handleCreateGenre}
+              disabled={creatingGenre || !newGenreName.trim()}
+              className="px-3 py-2 text-xs bg-forest text-cream rounded-sm hover:bg-forest/90 disabled:opacity-50 shrink-0"
+            >
+              {creatingGenre ? "Saving..." : "Add genre"}
+            </button>
           </div>
         </div>
 
         <div>
           <label className={labelClassName}>Moods</label>
           <div className="flex flex-wrap gap-2">
-            {moods.map((mood) => (
+            {moodOptions.map((mood) => (
               <button
                 key={mood.slug}
                 type="button"
@@ -478,6 +584,23 @@ export function BookForm({
                 {mood.name}
               </button>
             ))}
+          </div>
+          <div className="flex gap-2 mt-3">
+            <input
+              type="text"
+              value={newMoodName}
+              onChange={(e) => setNewMoodName(e.target.value)}
+              placeholder="New mood name"
+              className={inputClassName}
+            />
+            <button
+              type="button"
+              onClick={handleCreateMood}
+              disabled={creatingMood || !newMoodName.trim()}
+              className="px-3 py-2 text-xs bg-forest text-cream rounded-sm hover:bg-forest/90 disabled:opacity-50 shrink-0"
+            >
+              {creatingMood ? "Saving..." : "Add mood"}
+            </button>
           </div>
         </div>
       </FormSection>

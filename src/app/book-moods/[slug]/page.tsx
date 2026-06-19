@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { moods, getMoodBySlug } from "@/lib/data/moods";
+import { getMoodBySlug, getMoods } from "@/lib/data/moods";
 import { getPostsByMood } from "@/lib/data/posts";
 import { filterBooks } from "@/lib/data/books";
 import { PostCard } from "@/components/cards/PostCard";
@@ -15,12 +15,13 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  const moods = await getMoods();
   return moods.map((mood) => ({ slug: mood.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const mood = getMoodBySlug(slug);
+  const mood = await getMoodBySlug(slug);
   if (!mood) return { title: "Mood Not Found" };
 
   return {
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function MoodPage({ params }: PageProps) {
   const { slug } = await params;
-  const mood = getMoodBySlug(slug);
+  const mood = await getMoodBySlug(slug);
   if (!mood) notFound();
 
   const moodPosts = getPostsByMood(slug);

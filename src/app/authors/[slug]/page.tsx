@@ -13,6 +13,7 @@ import { stripHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { CoverImage } from "@/components/ui/CoverImage";
 import { RichTextContent } from "@/components/ui/RichTextContent";
+import { AuthorBookLinkList } from "@/components/authors/AuthorBookLinkList";
 
 export const dynamic = "force-dynamic";
 
@@ -123,6 +124,13 @@ export default async function AuthorPage({ params }: PageProps) {
           </p>
         </section>
 
+        {author.mainBooks.length > 0 && (
+          <section className="mb-10">
+            <h2 className="font-serif text-xl text-ink mb-4">Main Books</h2>
+            <AuthorBookLinkList links={author.mainBooks} authorBooks={authorBooks} />
+          </section>
+        )}
+
         {authorBooks.length > 0 && (
           <section className="mb-10">
             <h2 className="font-serif text-xl text-ink mb-4">
@@ -163,35 +171,16 @@ export default async function AuthorPage({ params }: PageProps) {
           </section>
         )}
 
-        {author.readingOrder && author.readingOrder.length > 0 && (
+        {author.readingOrder.length > 0 && (
           <section className="mb-10">
             <h2 className="font-serif text-xl text-ink mb-4">
               Recommended Reading Order
             </h2>
-            <ol className="space-y-2">
-              {author.readingOrder.map((bookSlug, i) => {
-                const book = authorBooks.find((b) => b.slug === bookSlug);
-                return (
-                  <li key={bookSlug} className="flex items-center gap-3 text-sm">
-                    <span className="w-6 h-6 rounded-full bg-forest/10 text-forest text-xs flex items-center justify-center font-medium shrink-0">
-                      {i + 1}
-                    </span>
-                    {book ? (
-                      <Link
-                        href={`/books/${book.slug}`}
-                        className="text-burgundy hover:underline font-medium"
-                      >
-                        {book.title}
-                      </Link>
-                    ) : (
-                      <span className="text-coffee capitalize">
-                        {bookSlug.replace(/-/g, " ")}
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
+            <AuthorBookLinkList
+              links={author.readingOrder}
+              authorBooks={authorBooks}
+              ordered
+            />
           </section>
         )}
 

@@ -4,9 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Author } from "@prisma/client";
 import { slugify, stripHtml } from "@/lib/utils";
+import { parseBookLinks } from "@/lib/authors/book-links";
+import type { AuthorBookLink } from "@/lib/types";
 import { formatValidationErrors } from "@/lib/validations/errors";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageField } from "./ImageField";
+import { BookLinkListField } from "./BookLinkListField";
 import { inputClassName, labelClassName, textareaClassName } from "./form-styles";
 
 interface AuthorFormProps {
@@ -26,12 +29,19 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
     nationality: author?.nationality ?? "",
     birthYear: author?.birthYear ?? "",
     deathYear: author?.deathYear ?? "",
-    mainBooks: author?.mainBooks.join(", ") ?? "",
+    mainBooks: parseBookLinks(author?.mainBooks ?? []),
     whereToStart: author?.whereToStart ?? "",
-    readingOrder: author?.readingOrder.join(", ") ?? "",
+    readingOrder: parseBookLinks(author?.readingOrder ?? []),
     image: author?.image ?? "",
     published: author?.published ?? true,
   });
+
+  function updateBookLinks(
+    field: "mainBooks" | "readingOrder",
+    value: AuthorBookLink[]
+  ) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
 
   function update(field: string, value: string | number | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -75,12 +85,9 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
       nationality: form.nationality,
       birthYear: form.birthYear ? Number(form.birthYear) : undefined,
       deathYear: form.deathYear ? Number(form.deathYear) : undefined,
-      mainBooks: form.mainBooks.split(",").map((b) => b.trim()).filter(Boolean),
+      mainBooks: form.mainBooks.filter((book) => book.title.trim()),
       whereToStart: form.whereToStart,
-      readingOrder: form.readingOrder
-        .split(",")
-        .map((b) => b.trim())
-        .filter(Boolean),
+      readingOrder: form.readingOrder.filter((book) => book.title.trim()),
       image: form.image || undefined,
       published: form.published,
     };
@@ -204,25 +211,19 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
         />
       </div>
 
-      <div>
-        <label className={labelClassName}>Main Books (comma-separated)</label>
-        <input
-          type="text"
-          value={form.mainBooks}
-          onChange={(e) => update("mainBooks", e.target.value)}
-          className={inputClassName}
-        />
-      </div>
+      <BookLinkListField
+        label="Main Books"
+        description="Up to 5 books. The name appears on the author page and links to the URL you provide."
+        value={form.mainBooks}
+        onChange={(value) => updateBookLinks("mainBooks", value)}
+      />
 
-      <div>
-        <label className={labelClassName}>Reading Order (comma-separated)</label>
-        <input
-          type="text"
-          value={form.readingOrder}
-          onChange={(e) => update("readingOrder", e.target.value)}
-          className={inputClassName}
-        />
-      </div>
+      <BookLinkListField
+        label="Reading Order"
+        description="Up to 5 books in recommended reading order. Each name becomes a clickable link."
+        value={form.readingOrder}
+        onChange={(value) => updateBookLinks("readingOrder", value)}
+      />
 
       <label className="flex items-center gap-2 text-sm text-ink">
         <input
