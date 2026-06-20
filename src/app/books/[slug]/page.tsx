@@ -6,7 +6,10 @@ import { getBookBySlug, getBooksBySlugs, getBookSlugs } from "@/lib/data/books";
 import { getAuthorBySlug } from "@/lib/data/authors";
 import { getPostsByRelatedBook } from "@/lib/data/posts";
 import { stripHtml } from "@/lib/utils";
+import { buildShareMetadata } from "@/lib/metadata/share";
+import { absoluteUrl } from "@/lib/site-url";
 import { Button } from "@/components/ui/Button";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 import { BuyOnAmazon } from "@/components/books/BuyOnAmazon";
 import { CoverImage } from "@/components/ui/CoverImage";
 import { RichTextContent } from "@/components/ui/RichTextContent";
@@ -29,15 +32,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const description = stripHtml(book.description).slice(0, 160);
 
-  return {
+  return buildShareMetadata({
     title: `${book.title} by ${book.author}`,
     description,
-    openGraph: {
-      title: `${book.title} by ${book.author}`,
-      description,
-      images: book.coverImage ? [{ url: book.coverImage }] : undefined,
-    },
-  };
+    path: `/books/${slug}`,
+    image: book.coverImage,
+    type: "article",
+  });
 }
 
 export default async function BookPage({ params }: PageProps) {
@@ -105,6 +106,13 @@ export default async function BookPage({ params }: PageProps) {
               </Link>{" "}
               · {book.year}
             </p>
+
+            <ShareButtons
+              url={absoluteUrl(`/books/${book.slug}`)}
+              title={book.title}
+              description={stripHtml(book.description).slice(0, 160)}
+              className="mt-4"
+            />
 
             <div className="mt-4 flex flex-wrap gap-2">
               {book.genres.map((g) => (

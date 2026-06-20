@@ -7,7 +7,7 @@ import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useImperativeHandle, forwardRef, useState } from "react";
 import {
   AlignCenter,
   AlignLeft,
@@ -27,7 +27,10 @@ import {
   Undo,
 } from "lucide-react";
 import { MediaPicker } from "./MediaPicker";
-import { useState } from "react";
+
+export type RichTextEditorHandle = {
+  insertLink: (text: string, url: string) => void;
+};
 
 interface RichTextEditorProps {
   value: string;
@@ -67,13 +70,19 @@ function ToolbarButton({
   );
 }
 
-export function RichTextEditor({
-  value,
-  onChange,
-  placeholder = "Write your content...",
-  minHeight = 420,
-  maxHeight = "calc(100vh - 12rem)",
-}: RichTextEditorProps) {
+export const RichTextEditor = forwardRef<
+  RichTextEditorHandle,
+  RichTextEditorProps
+>(function RichTextEditor(
+  {
+    value,
+    onChange,
+    placeholder = "Write your content...",
+    minHeight = 420,
+    maxHeight = "calc(100vh - 12rem)",
+  },
+  ref
+) {
   const [mediaOpen, setMediaOpen] = useState(false);
 
   const editor = useEditor({
@@ -110,6 +119,22 @@ export function RichTextEditor({
       editor.commands.setContent(value || "", { emitUpdate: false });
     }
   }, [editor, value]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      insertLink(text: string, url: string) {
+        editor
+          ?.chain()
+          .focus()
+          .insertContent(
+            `<a href="${url}" target="_blank" rel="noopener noreferrer sponsored">${text}</a> `
+          )
+          .run();
+      },
+    }),
+    [editor]
+  );
 
   const setLink = useCallback(() => {
     if (!editor) return;
@@ -273,4 +298,4 @@ export function RichTextEditor({
       />
     </div>
   );
-}
+});

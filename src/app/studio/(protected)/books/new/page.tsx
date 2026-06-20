@@ -2,15 +2,16 @@ import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
 import { getGenres } from "@/lib/data/genres";
 import { getMoods } from "@/lib/data/moods";
+import { getAffiliateLinks } from "@/lib/data/affiliate-links";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
 import { BookForm } from "@/components/admin/BookForm";
 
 async function getBookFormData() {
   if (!isDatabaseConfigured()) {
-    return { authors: [], allBooks: [], genres: [], moods: [] };
+    return { authors: [], allBooks: [], genres: [], moods: [], affiliateLinks: [] };
   }
 
-  const [authors, allBooks, genres, moods] = await Promise.all([
+  const [authors, allBooks, genres, moods, affiliateLinks] = await Promise.all([
     prisma.author.findMany({
       orderBy: { name: "asc" },
       select: { name: true, slug: true },
@@ -21,16 +22,17 @@ async function getBookFormData() {
     }),
     getGenres(),
     getMoods(),
+    getAffiliateLinks(),
   ]);
 
-  return { authors, allBooks, genres, moods };
+  return { authors, allBooks, genres, moods, affiliateLinks };
 }
 
 export default async function NewBookPage() {
   const adminPath = getAdminPath();
   if (!adminPath) notFound();
 
-  const { authors, allBooks, genres, moods } = await getBookFormData();
+  const { authors, allBooks, genres, moods, affiliateLinks } = await getBookFormData();
 
   return (
     <div>
@@ -41,6 +43,7 @@ export default async function NewBookPage() {
         allBooks={allBooks}
         genres={genres}
         moods={moods}
+        affiliateLinks={affiliateLinks}
       />
     </div>
   );

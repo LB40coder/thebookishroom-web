@@ -51,6 +51,12 @@ export default async function ProtectedStudioLayout({
                 Authors
               </Link>
               <Link
+                href={`/${adminPath}/affiliate-links`}
+                className="text-cream/80 hover:text-cream transition-colors"
+              >
+                Affiliate Links
+              </Link>
+              <Link
                 href={`/${adminPath}/media`}
                 className="text-cream/80 hover:text-cream transition-colors"
               >

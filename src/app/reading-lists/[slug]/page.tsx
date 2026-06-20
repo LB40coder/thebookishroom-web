@@ -5,7 +5,10 @@ import { Clock, ArrowLeft } from "lucide-react";
 import { getPostBySlug, getPublishedPosts } from "@/lib/data/posts";
 import { getBooksBySlugs } from "@/lib/data/books";
 import { formatDate } from "@/lib/utils";
+import { buildShareMetadata } from "@/lib/metadata/share";
+import { absoluteUrl } from "@/lib/site-url";
 import { Button } from "@/components/ui/Button";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 import { CoverImage } from "@/components/ui/CoverImage";
 import { RichTextContent } from "@/components/ui/RichTextContent";
@@ -21,15 +24,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = await getPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
 
-  return {
+  return buildShareMetadata({
     title: post.seoTitle.replace(" | The Bookish Room", ""),
-    description: post.seoDescription,
-    openGraph: {
-      title: post.seoTitle,
-      description: post.seoDescription,
-      images: [{ url: post.coverImage }],
-    },
-  };
+    description: post.seoDescription || post.excerpt,
+    path: `/reading-lists/${slug}`,
+    image: post.coverImage,
+    type: "article",
+  });
 }
 
 export default async function PostPage({ params }: PageProps) {
@@ -72,6 +73,13 @@ export default async function PostPage({ params }: PageProps) {
           <p className="mt-4 text-lg text-coffee font-reading leading-relaxed">
             {post.excerpt}
           </p>
+
+          <ShareButtons
+            url={absoluteUrl(`/reading-lists/${post.slug}`)}
+            title={post.title}
+            description={post.excerpt}
+            className="mt-5"
+          />
 
           <div className="relative aspect-[16/9] rounded-sm overflow-hidden my-8">
             <CoverImage

@@ -98,6 +98,20 @@ model Author {
   @@index([slug])
 }
 
+model AffiliateLink {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  bookSlug  String?
+  language  String?
+  format    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookSlug])
+  @@index([createdAt])
+}
+
 model ApiLog {
   id        String   @id @default(cuid())
   method    String

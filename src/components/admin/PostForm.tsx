@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Post } from "@prisma/client";
 import { slugify } from "@/lib/utils";
+import type { AffiliateLink } from "@/lib/types";
 import {
   defaultPublishDatetimeLocal,
   fromDatetimeLocalValue,
@@ -11,7 +13,8 @@ import {
   toDatetimeLocalValue,
   type PostDisplayStatus,
 } from "@/lib/posts/visibility";
-import { RichTextEditor } from "./RichTextEditor";
+import { RichTextEditor, type RichTextEditorHandle } from "./RichTextEditor";
+import { AffiliateLinksPanel } from "./AffiliateLinksPanel";
 import { ImageField } from "./ImageField";
 import {
   inputClassName,
@@ -23,6 +26,7 @@ import {
 interface PostFormProps {
   adminPath: string;
   post?: Post;
+  affiliateLinks?: AffiliateLink[];
 }
 
 function SidebarSection({
@@ -45,8 +49,9 @@ function initialStatus(post?: Post): PostDisplayStatus {
   return getPostDisplayStatus(post.published, post.publishedAt);
 }
 
-export function PostForm({ adminPath, post }: PostFormProps) {
+export function PostForm({ adminPath, post, affiliateLinks = [] }: PostFormProps) {
   const router = useRouter();
+  const editorRef = useRef<RichTextEditorHandle>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -165,6 +170,20 @@ export function PostForm({ adminPath, post }: PostFormProps) {
     fromDatetimeLocalValue(form.publishedAtLocal)
   );
 
+  const visibleAffiliateLinks = useMemo(() => {
+    const relatedSlugs = form.relatedBooks
+      .split(",")
+      .map((slug) => slug.trim())
+      .filter(Boolean);
+    const slugSet = new Set(relatedSlugs);
+
+    if (slugSet.size === 0) return affiliateLinks;
+
+    return affiliateLinks.filter(
+      (link) => !link.bookSlug || slugSet.has(link.bookSlug)
+    );
+  }, [affiliateLinks, form.relatedBooks]);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
@@ -182,6 +201,7 @@ export function PostForm({ adminPath, post }: PostFormProps) {
         <div className="min-w-0">
           <label className={labelClassName}>Content</label>
           <RichTextEditor
+            ref={editorRef}
             value={form.content}
             onChange={(html) => update("content", html)}
             placeholder="Write your reading list article..."
@@ -310,6 +330,25 @@ export function PostForm({ adminPath, post }: PostFormProps) {
                 className={inputClassName}
               />
             </div>
+          </SidebarSection>
+
+          <SidebarSection title="Affiliate Links">
+            <p className="text-[11px] text-coffee">
+              Reuse saved Amazon links in your post content. Links matching related
+              books appear first.
+            </p>
+            <AffiliateLinksPanel
+              links={visibleAffiliateLinks}
+              onInsert={(link) =>
+                editorRef.current?.insertLink(link.title, link.url)
+              }
+            />
+            <Link
+              href={`/${adminPath}/affiliate-links`}
+              className="inline-block text-xs text-forest hover:underline"
+            >
+              Manage affiliate links
+            </Link>
           </SidebarSection>
 
           <SidebarSection title="SEO">

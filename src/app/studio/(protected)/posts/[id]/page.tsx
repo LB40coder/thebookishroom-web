@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
+import { getAffiliateLinksForBooks } from "@/lib/data/affiliate-links";
 import { getPostDisplayStatus } from "@/lib/posts/visibility";
 import { PostForm } from "@/components/admin/PostForm";
 import { StudioEditHeader } from "@/components/admin/StudioEditHeader";
@@ -20,6 +21,7 @@ export default async function EditPostPage({ params }: PageProps) {
   const post = await prisma.post.findUnique({ where: { id } });
   if (!post) notFound();
 
+  const affiliateLinks = await getAffiliateLinksForBooks(post.relatedBooks);
   const status = getPostDisplayStatus(post.published, post.publishedAt);
 
   return (
@@ -31,7 +33,7 @@ export default async function EditPostPage({ params }: PageProps) {
         }
         viewLabel="View post"
       />
-      <PostForm adminPath={adminPath} post={post} />
+      <PostForm adminPath={adminPath} post={post} affiliateLinks={affiliateLinks} />
     </div>
   );
 }

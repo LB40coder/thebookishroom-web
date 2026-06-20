@@ -11,7 +11,10 @@ import { getPublishedBooksByAuthorSlug } from "@/lib/data/books";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { publicPostFilter } from "@/lib/posts/visibility";
 import { stripHtml } from "@/lib/utils";
+import { buildShareMetadata } from "@/lib/metadata/share";
+import { absoluteUrl } from "@/lib/site-url";
 import { Button } from "@/components/ui/Button";
+import { ShareButtons } from "@/components/ui/ShareButtons";
 import { CoverImage } from "@/components/ui/CoverImage";
 import { RichTextContent } from "@/components/ui/RichTextContent";
 import { AuthorBookLinkList } from "@/components/authors/AuthorBookLinkList";
@@ -34,15 +37,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const description = stripHtml(author.bio).slice(0, 160);
 
-  return {
+  return buildShareMetadata({
     title: author.name,
     description,
-    openGraph: {
-      title: `${author.name} — Author Profile`,
-      description,
-      images: author.image ? [{ url: author.image }] : undefined,
-    },
-  };
+    path: `/authors/${slug}`,
+    image: author.image,
+    type: "profile",
+  });
 }
 
 export default async function AuthorPage({ params }: PageProps) {
@@ -107,6 +108,12 @@ export default async function AuthorPage({ params }: PageProps) {
               {author.nationality}
               {period && ` · ${period}`}
             </p>
+            <ShareButtons
+              url={absoluteUrl(`/authors/${author.slug}`)}
+              title={author.name}
+              description={stripHtml(author.bio).slice(0, 160)}
+              className="mt-4"
+            />
           </div>
         </div>
 

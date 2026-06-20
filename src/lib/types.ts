@@ -9,6 +9,15 @@ export interface AmazonEdition {
   format?: "paperback" | "kindle" | "hardcover";
 }
 
+export interface AffiliateLink {
+  id: string;
+  title: string;
+  url: string;
+  bookSlug?: string;
+  language?: BookLanguage | string;
+  format?: "paperback" | "kindle" | "hardcover" | string;
+}
+
 export interface Post {
   title: string;
   slug: string;

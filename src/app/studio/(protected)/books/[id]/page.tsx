@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
+import { getAffiliateLinksForBook } from "@/lib/data/affiliate-links";
 import { getGenres } from "@/lib/data/genres";
 import { getMoods } from "@/lib/data/moods";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
@@ -33,6 +34,8 @@ export default async function EditBookPage({ params }: PageProps) {
 
   if (!book) notFound();
 
+  const affiliateLinks = await getAffiliateLinksForBook(book.slug);
+
   return (
     <div>
       <StudioEditHeader
@@ -47,6 +50,7 @@ export default async function EditBookPage({ params }: PageProps) {
         allBooks={allBooks}
         genres={genres}
         moods={moods}
+        affiliateLinks={affiliateLinks}
       />
     </div>
   );

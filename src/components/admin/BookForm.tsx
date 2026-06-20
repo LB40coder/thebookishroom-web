@@ -10,7 +10,7 @@ import {
   editionLabelForLanguage,
 } from "@/lib/books/amazon-editions";
 import { formatGenreName } from "@/lib/data/taxonomy-defaults";
-import type { AmazonEdition, BookLanguage } from "@/lib/types";
+import type { AmazonEdition, AffiliateLink, BookLanguage } from "@/lib/types";
 import { formatValidationErrors } from "@/lib/validations/errors";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageField } from "./ImageField";
@@ -33,6 +33,7 @@ interface BookFormProps {
   allBooks: BookOption[];
   genres: TaxonomyOption[];
   moods: TaxonomyOption[];
+  affiliateLinks?: AffiliateLink[];
 }
 
 function FormSection({
@@ -64,6 +65,7 @@ export function BookForm({
   allBooks,
   genres: initialGenres,
   moods: initialMoods,
+  affiliateLinks: initialAffiliateLinks = [],
 }: BookFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -117,6 +119,10 @@ export function BookForm({
   });
 
   const [editions, setEditions] = useState<AmazonEditionForm[]>(initialEditions);
+  const [affiliateLinkOptions, setAffiliateLinkOptions] = useState(
+    initialAffiliateLinks
+  );
+  const [savingLinkIndex, setSavingLinkIndex] = useState<number | null>(null);
 
   const similarBookOptions = allBooks.filter((b) => b.id !== book?.id);
 
@@ -266,6 +272,63 @@ export function BookForm({
 
   function removeEdition(index: number) {
     setEditions((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  const visibleAffiliateLinks = affiliateLinkOptions.filter(
+    (link) => !link.bookSlug || link.bookSlug === form.slug
+  );
+
+  function addEditionFromLink(link: AffiliateLink) {
+    setEditions((prev) => [
+      ...prev,
+      {
+        language: (link.language as BookLanguage) || "en",
+        label: link.title,
+        url: link.url,
+        ...(link.format
+          ? { format: link.format as AmazonEditionForm["format"] }
+          : {}),
+      },
+    ]);
+  }
+
+  async function saveEditionToLibrary(index: number) {
+    const edition = editions[index];
+    if (!edition.label.trim() || !edition.url.trim() || edition.url === "https://") {
+      setError("Add a label and affiliate URL before saving to the library.");
+      return;
+    }
+
+    setSavingLinkIndex(index);
+    setError("");
+
+    try {
+      const res = await fetch("/api/admin/affiliate-links", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: edition.label.trim(),
+          url: edition.url.trim(),
+          bookSlug: form.slug || undefined,
+          language: edition.language,
+          format: edition.format,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(formatValidationErrors(data.details) || data.error || "Failed to save link");
+        return;
+      }
+
+      setAffiliateLinkOptions((prev) => {
+        const next = [...prev.filter((item) => item.id !== data.data.id), data.data];
+        return next.sort((a, b) => a.title.localeCompare(b.title));
+      });
+    } catch {
+      setError("Failed to save affiliate link");
+    } finally {
+      setSavingLinkIndex(null);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -462,6 +525,25 @@ export function BookForm({
             + Add edition
           </button>
         </div>
+
+        {visibleAffiliateLinks.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs text-coffee">Saved affiliate links</p>
+            <div className="flex flex-wrap gap-2">
+              {visibleAffiliateLinks.map((link) => (
+                <button
+                  key={link.id}
+                  type="button"
+                  onClick={() => addEditionFromLink(link)}
+                  className="text-xs px-2.5 py-1 rounded-sm border border-coffee/20 text-coffee hover:bg-cream-dark"
+                >
+                  + {link.title}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {editions.length === 0 ? (
           <p className="text-xs text-coffee">No Amazon links yet.</p>
         ) : (
@@ -516,13 +598,23 @@ export function BookForm({
                   placeholder="Amazon URL"
                   className={inputClassName}
                 />
-                <button
-                  type="button"
-                  onClick={() => removeEdition(index)}
-                  className="text-xs text-burgundy hover:underline"
-                >
-                  Remove edition
-                </button>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => saveEditionToLibrary(index)}
+                    disabled={savingLinkIndex === index}
+                    className="text-xs text-forest hover:underline disabled:opacity-50"
+                  >
+                    {savingLinkIndex === index ? "Saving..." : "Save to library"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeEdition(index)}
+                    className="text-xs text-burgundy hover:underline"
+                  >
+                    Remove edition
+                  </button>
+                </div>
               </div>
             ))}
           </div>
