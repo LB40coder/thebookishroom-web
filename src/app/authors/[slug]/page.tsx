@@ -108,12 +108,6 @@ export default async function AuthorPage({ params }: PageProps) {
               {author.nationality}
               {period && ` · ${period}`}
             </p>
-            <ShareButtons
-              url={absoluteUrl(`/authors/${author.slug}`)}
-              title={author.name}
-              description={stripHtml(author.bio).slice(0, 160)}
-              className="mt-4"
-            />
           </div>
         </div>
 
@@ -191,6 +185,13 @@ export default async function AuthorPage({ params }: PageProps) {
             />
           </section>
         )}
+
+        <ShareButtons
+          url={absoluteUrl(`/authors/${author.slug}`)}
+          title={author.name}
+          description={stripHtml(author.bio).slice(0, 160)}
+          className="mb-10 pt-6 border-t border-coffee/10"
+        />
 
         {relatedPosts.length > 0 && (
           <section className="pt-8 border-t border-coffee/10">

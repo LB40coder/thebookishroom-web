@@ -89,6 +89,13 @@ export default async function BookPage({ params }: PageProps) {
               {book.amazonEditions && book.amazonEditions.length > 0 && (
                 <BuyOnAmazon editions={book.amazonEditions} />
               )}
+
+              <ShareButtons
+                url={absoluteUrl(`/books/${book.slug}`)}
+                title={book.title}
+                description={stripHtml(book.description).slice(0, 160)}
+                className="mt-6 pt-6 border-t border-coffee/10"
+              />
             </div>
           </div>
 
@@ -106,13 +113,6 @@ export default async function BookPage({ params }: PageProps) {
               </Link>{" "}
               · {book.year}
             </p>
-
-            <ShareButtons
-              url={absoluteUrl(`/books/${book.slug}`)}
-              title={book.title}
-              description={stripHtml(book.description).slice(0, 160)}
-              className="mt-4"
-            />
 
             <div className="mt-4 flex flex-wrap gap-2">
               {book.genres.map((g) => (
