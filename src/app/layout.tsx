@@ -6,6 +6,7 @@ import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getTrendingPosts } from "@/lib/data/posts";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -28,6 +29,7 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "The Bookish Room — Discover Books by Mood, Genre & Aesthetic",
     template: "%s | The Bookish Room",

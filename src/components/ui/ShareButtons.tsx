@@ -21,7 +21,7 @@ function shareLinks(url: string, title: string, description?: string) {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     x: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`,
     pinterest: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedText}`,
-    whatsapp: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(`${title}\n\n${url}`)}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
     email: `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0A${encodedUrl}`,
   };
