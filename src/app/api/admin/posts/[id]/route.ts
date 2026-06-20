@@ -10,6 +10,15 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+function toPostUpdateData(data: ReturnType<typeof postUpdateSchema.parse>) {
+  const { publishedAt, ...rest } = data;
+
+  return {
+    ...rest,
+    ...(publishedAt !== undefined ? { publishedAt: new Date(publishedAt) } : {}),
+  };
+}
+
 export async function PUT(request: Request, { params }: RouteParams) {
   if (!isDatabaseConfigured()) return apiError("Database not configured", 503);
 
@@ -28,7 +37,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const post = await prisma.post.update({
       where: { id },
-      data: parsed.data,
+      data: toPostUpdateData(parsed.data),
     });
     revalidatePostPages(post.slug);
     return NextResponse.json({ data: post });

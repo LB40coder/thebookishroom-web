@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getMoods } from "@/lib/data/moods";
 import { getPublishedAuthors } from "@/lib/data/authors";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
+import { publicPostFilter } from "@/lib/posts/visibility";
 import { stripHtml } from "@/lib/utils";
 import type { SearchResult } from "@/lib/search";
 
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
 
   if (isDatabaseConfigured()) {
     const [posts, books, authors] = await Promise.all([
-      prisma.post.findMany({ where: { published: true } }),
+      prisma.post.findMany({ where: publicPostFilter() }),
       prisma.book.findMany({ where: { published: true } }),
       getPublishedAuthors(),
     ]);

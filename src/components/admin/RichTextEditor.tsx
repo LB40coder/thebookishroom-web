@@ -33,6 +33,8 @@ interface RichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  minHeight?: number;
+  maxHeight?: string;
 }
 
 function ToolbarButton({
@@ -69,6 +71,8 @@ export function RichTextEditor({
   value,
   onChange,
   placeholder = "Write your content...",
+  minHeight = 420,
+  maxHeight = "calc(100vh - 12rem)",
 }: RichTextEditorProps) {
   const [mediaOpen, setMediaOpen] = useState(false);
 
@@ -91,7 +95,8 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "prose-studio min-h-[280px] px-4 py-3 focus:outline-none text-sm text-ink",
+          "prose-studio px-4 py-3 focus:outline-none text-sm text-ink min-h-full",
+        style: `min-height: ${minHeight}px`,
       },
     },
     onUpdate: ({ editor: ed }) => {
@@ -128,8 +133,11 @@ export function RichTextEditor({
   if (!editor) return null;
 
   return (
-    <div className="border border-coffee/20 rounded-sm bg-cream overflow-hidden">
-      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-coffee/10 bg-cream-dark/60">
+    <div
+      className="flex flex-col border border-coffee/20 rounded-sm bg-cream overflow-hidden"
+      style={{ maxHeight }}
+    >
+      <div className="sticky top-0 z-10 shrink-0 flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-coffee/10 bg-cream-dark/95 backdrop-blur-sm">
         <ToolbarButton
           title="Bold"
           onClick={() => editor.chain().focus().toggleBold().run()}
@@ -251,7 +259,9 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
 
-      <EditorContent editor={editor} />
+      <div className="overflow-y-auto flex-1 min-h-0">
+        <EditorContent editor={editor} />
+      </div>
 
       <MediaPicker
         open={mediaOpen}

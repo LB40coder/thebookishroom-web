@@ -7,7 +7,7 @@ export default async function NewPostPage() {
   if (!adminPath) notFound();
 
   return (
-    <div>
+    <div className="max-w-[1400px]">
       <h1 className="font-serif text-2xl text-ink mb-6">New Post</h1>
       <PostForm adminPath={adminPath} />
     </div>

@@ -2,6 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminPath } from "@/lib/auth/security";
 import { isDatabaseConfigured, prisma } from "@/lib/db";
+import {
+  getPostDisplayStatus,
+  postStatusLabel,
+} from "@/lib/posts/visibility";
 import { StudioRowActions } from "@/components/admin/StudioRowActions";
 
 export default async function AdminPostsPage() {
@@ -32,40 +36,61 @@ export default async function AdminPostsPage() {
             <thead className="bg-cream-dark border-b border-coffee/10">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-coffee">Title</th>
-                <th className="text-left px-4 py-3 font-medium text-coffee hidden sm:table-cell">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-coffee hidden md:table-cell">Views</th>
+                <th className="text-left px-4 py-3 font-medium text-coffee hidden sm:table-cell">
+                  Status
+                </th>
+                <th className="text-left px-4 py-3 font-medium text-coffee hidden md:table-cell">
+                  Publish date
+                </th>
+                <th className="text-left px-4 py-3 font-medium text-coffee hidden md:table-cell">
+                  Views
+                </th>
                 <th className="text-right px-4 py-3 font-medium text-coffee">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {posts.map((post) => (
-                <tr key={post.id} className="border-b border-coffee/5 last:border-0">
-                  <td className="px-4 py-3 text-ink">{post.title}</td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-sm ${
-                        post.published
-                          ? "bg-forest/10 text-forest"
-                          : "bg-coffee/10 text-coffee"
-                      }`}
-                    >
-                      {post.published ? "Published" : "Draft"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-coffee hidden md:table-cell">
-                    {post.views}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <StudioRowActions
-                      editHref={`/${adminPath}/posts/${post.id}`}
-                      viewHref={
-                        post.published ? `/reading-lists/${post.slug}` : undefined
-                      }
-                      viewLabel="View post"
-                    />
-                  </td>
-                </tr>
-              ))}
+              {posts.map((post) => {
+                const status = getPostDisplayStatus(
+                  post.published,
+                  post.publishedAt
+                );
+
+                return (
+                  <tr key={post.id} className="border-b border-coffee/5 last:border-0">
+                    <td className="px-4 py-3 text-ink">{post.title}</td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-sm ${
+                          status === "published"
+                            ? "bg-forest/10 text-forest"
+                            : status === "scheduled"
+                              ? "bg-burgundy/10 text-burgundy"
+                              : "bg-coffee/10 text-coffee"
+                        }`}
+                      >
+                        {postStatusLabel(status)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-coffee hidden md:table-cell">
+                      {post.publishedAt.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-coffee hidden md:table-cell">
+                      {post.views}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <StudioRowActions
+                        editHref={`/${adminPath}/posts/${post.id}`}
+                        viewHref={
+                          status === "published"
+                            ? `/reading-lists/${post.slug}`
+                            : undefined
+                        }
+                        viewLabel="View post"
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

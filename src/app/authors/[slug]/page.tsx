@@ -9,6 +9,7 @@ import {
 } from "@/lib/data/authors";
 import { getPublishedBooksByAuthorSlug } from "@/lib/data/books";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
+import { publicPostFilter } from "@/lib/posts/visibility";
 import { stripHtml } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { CoverImage } from "@/components/ui/CoverImage";
@@ -56,7 +57,7 @@ export default async function AuthorPage({ params }: PageProps) {
     isDatabaseConfigured() && authorBooks.length > 0
       ? await prisma.post.findMany({
           where: {
-            published: true,
+            ...publicPostFilter(),
             relatedBooks: {
               hasSome: authorBooks.map((book) => book.slug),
             },

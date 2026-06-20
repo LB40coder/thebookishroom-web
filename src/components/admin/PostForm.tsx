@@ -4,13 +4,45 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Post } from "@prisma/client";
 import { slugify } from "@/lib/utils";
+import {
+  defaultPublishDatetimeLocal,
+  fromDatetimeLocalValue,
+  getPostDisplayStatus,
+  toDatetimeLocalValue,
+  type PostDisplayStatus,
+} from "@/lib/posts/visibility";
 import { RichTextEditor } from "./RichTextEditor";
 import { ImageField } from "./ImageField";
-import { inputClassName, labelClassName, textareaClassName } from "./form-styles";
+import {
+  inputClassName,
+  labelClassName,
+  selectClassName,
+  textareaClassName,
+} from "./form-styles";
 
 interface PostFormProps {
   adminPath: string;
   post?: Post;
+}
+
+function SidebarSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="p-4 bg-cream rounded-sm border border-coffee/10 space-y-3">
+      <h2 className="font-serif text-base text-ink">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function initialStatus(post?: Post): PostDisplayStatus {
+  if (!post) return "draft";
+  return getPostDisplayStatus(post.published, post.publishedAt);
 }
 
 export function PostForm({ adminPath, post }: PostFormProps) {
@@ -31,10 +63,13 @@ export function PostForm({ adminPath, post }: PostFormProps) {
     readingTime: post?.readingTime ?? 5,
     seoTitle: post?.seoTitle ?? "",
     seoDescription: post?.seoDescription ?? "",
-    published: post?.published ?? false,
+    status: initialStatus(post),
+    publishedAtLocal: post
+      ? toDatetimeLocalValue(post.publishedAt)
+      : defaultPublishDatetimeLocal(),
   });
 
-  function update(field: string, value: string | number | boolean) {
+  function update(field: string, value: string | number) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
@@ -47,13 +82,38 @@ export function PostForm({ adminPath, post }: PostFormProps) {
     }));
   }
 
+  function handleStatusChange(status: PostDisplayStatus) {
+    setForm((prev) => ({
+      ...prev,
+      status,
+      publishedAtLocal:
+        status === "published" && prev.status !== "published"
+          ? defaultPublishDatetimeLocal()
+          : prev.publishedAtLocal,
+    }));
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    const publishedAt = fromDatetimeLocalValue(form.publishedAtLocal);
+    const published = form.status !== "draft";
+
+    if (form.status === "scheduled" && publishedAt.getTime() <= Date.now()) {
+      setError("Scheduled posts need a future date and time.");
+      setLoading(false);
+      return;
+    }
+
     const payload = {
-      ...form,
+      title: form.title,
+      slug: form.slug,
+      excerpt: form.excerpt,
+      content: form.content,
+      coverImage: form.coverImage,
+      category: form.category,
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
       moods: form.moods.split(",").map((m) => m.trim()).filter(Boolean),
       relatedBooks: form.relatedBooks
@@ -62,6 +122,9 @@ export function PostForm({ adminPath, post }: PostFormProps) {
         .filter(Boolean),
       readingTime: Number(form.readingTime),
       seoTitle: form.seoTitle || `${form.title} | The Bookish Room`,
+      seoDescription: form.seoDescription,
+      published,
+      publishedAt: publishedAt.toISOString(),
     };
 
     try {
@@ -97,160 +160,202 @@ export function PostForm({ adminPath, post }: PostFormProps) {
     router.refresh();
   }
 
+  const previewStatus = getPostDisplayStatus(
+    form.status !== "draft",
+    fromDatetimeLocalValue(form.publishedAtLocal)
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <label className={labelClassName}>Title</label>
         <input
           type="text"
           value={form.title}
           onChange={(e) => handleTitleChange(e.target.value)}
-          className={inputClassName}
+          className={`${inputClassName} text-lg`}
           required
         />
       </div>
 
-      <div>
-        <label className={labelClassName}>Slug</label>
-        <input
-          type="text"
-          value={form.slug}
-          onChange={(e) => update("slug", e.target.value)}
-          className={inputClassName}
-          required
-        />
-      </div>
-
-      <div>
-        <label className={labelClassName}>Excerpt</label>
-        <textarea
-          value={form.excerpt}
-          onChange={(e) => update("excerpt", e.target.value)}
-          rows={3}
-          className={textareaClassName}
-          required
-        />
-      </div>
-
-      <div>
-        <label className={labelClassName}>Content</label>
-        <RichTextEditor
-          value={form.content}
-          onChange={(html) => update("content", html)}
-          placeholder="Write your reading list article..."
-        />
-      </div>
-
-      <ImageField
-        label="Cover Image"
-        value={form.coverImage}
-        onChange={(url) => update("coverImage", url)}
-        required
-      />
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelClassName}>Category</label>
-          <input
-            type="text"
-            value={form.category}
-            onChange={(e) => update("category", e.target.value)}
-            className={inputClassName}
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+        <div className="min-w-0">
+          <label className={labelClassName}>Content</label>
+          <RichTextEditor
+            value={form.content}
+            onChange={(html) => update("content", html)}
+            placeholder="Write your reading list article..."
+            minHeight={480}
+            maxHeight="calc(100vh - 14rem)"
           />
         </div>
-        <div>
-          <label className={labelClassName}>Reading Time (min)</label>
-          <input
-            type="number"
-            value={form.readingTime}
-            onChange={(e) => update("readingTime", Number(e.target.value))}
-            className={inputClassName}
-            min={1}
-            max={120}
-          />
-        </div>
-      </div>
 
-      <div>
-        <label className={labelClassName}>Tags (comma-separated)</label>
-        <input
-          type="text"
-          value={form.tags}
-          onChange={(e) => update("tags", e.target.value)}
-          className={inputClassName}
-        />
-      </div>
+        <aside className="space-y-4 lg:sticky lg:top-6">
+          <SidebarSection title="Publish">
+            <div>
+              <label className={labelClassName}>Status</label>
+              <select
+                value={form.status}
+                onChange={(e) =>
+                  handleStatusChange(e.target.value as PostDisplayStatus)
+                }
+                className={selectClassName}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="scheduled">Scheduled</option>
+              </select>
+            </div>
 
-      <div>
-        <label className={labelClassName}>Moods (comma-separated)</label>
-        <input
-          type="text"
-          value={form.moods}
-          onChange={(e) => update("moods", e.target.value)}
-          className={inputClassName}
-        />
-      </div>
+            {form.status !== "draft" && (
+              <div>
+                <label className={labelClassName}>Date and time</label>
+                <input
+                  type="datetime-local"
+                  value={form.publishedAtLocal}
+                  onChange={(e) => update("publishedAtLocal", e.target.value)}
+                  className={inputClassName}
+                  required
+                />
+                <p className="text-[11px] text-coffee mt-1.5">
+                  {previewStatus === "scheduled"
+                    ? "This post will go live automatically at the chosen time."
+                    : "Use a future date and time with status Scheduled to plan ahead."}
+                </p>
+              </div>
+            )}
+          </SidebarSection>
 
-      <div>
-        <label className={labelClassName}>Related Books (slugs, comma-separated)</label>
-        <input
-          type="text"
-          value={form.relatedBooks}
-          onChange={(e) => update("relatedBooks", e.target.value)}
-          className={inputClassName}
-        />
-      </div>
+          <SidebarSection title="Details">
+            <div>
+              <label className={labelClassName}>Slug</label>
+              <input
+                type="text"
+                value={form.slug}
+                onChange={(e) => update("slug", e.target.value)}
+                className={inputClassName}
+                required
+              />
+            </div>
 
-      <div>
-        <label className={labelClassName}>SEO Title</label>
-        <input
-          type="text"
-          value={form.seoTitle}
-          onChange={(e) => update("seoTitle", e.target.value)}
-          className={inputClassName}
-        />
-      </div>
+            <div>
+              <label className={labelClassName}>Excerpt</label>
+              <textarea
+                value={form.excerpt}
+                onChange={(e) => update("excerpt", e.target.value)}
+                rows={3}
+                className={textareaClassName}
+                required
+              />
+            </div>
 
-      <div>
-        <label className={labelClassName}>SEO Description</label>
-        <textarea
-          value={form.seoDescription}
-          onChange={(e) => update("seoDescription", e.target.value)}
-          rows={3}
-          className={textareaClassName}
-          required
-        />
-      </div>
+            <ImageField
+              label="Cover Image"
+              value={form.coverImage}
+              onChange={(url) => update("coverImage", url)}
+              required
+            />
 
-      <label className="flex items-center gap-2 text-sm text-ink">
-        <input
-          type="checkbox"
-          checked={form.published}
-          onChange={(e) => update("published", e.target.checked)}
-          className="rounded border-coffee/30"
-        />
-        Published
-      </label>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClassName}>Category</label>
+                <input
+                  type="text"
+                  value={form.category}
+                  onChange={(e) => update("category", e.target.value)}
+                  className={inputClassName}
+                />
+              </div>
+              <div>
+                <label className={labelClassName}>Reading Time (min)</label>
+                <input
+                  type="number"
+                  value={form.readingTime}
+                  onChange={(e) => update("readingTime", Number(e.target.value))}
+                  className={inputClassName}
+                  min={1}
+                  max={120}
+                />
+              </div>
+            </div>
 
-      {error && <p className="text-sm text-burgundy">{error}</p>}
+            <div>
+              <label className={labelClassName}>Tags (comma-separated)</label>
+              <input
+                type="text"
+                value={form.tags}
+                onChange={(e) => update("tags", e.target.value)}
+                className={inputClassName}
+              />
+            </div>
 
-      <div className="flex gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-5 py-2.5 bg-forest text-cream text-sm rounded-sm hover:bg-forest/90 disabled:opacity-50"
-        >
-          {loading ? "Saving..." : post ? "Update" : "Create"}
-        </button>
-        {post && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="px-5 py-2.5 text-sm text-burgundy border border-burgundy/30 rounded-sm hover:bg-burgundy/5"
-          >
-            Delete
-          </button>
-        )}
+            <div>
+              <label className={labelClassName}>Moods (comma-separated)</label>
+              <input
+                type="text"
+                value={form.moods}
+                onChange={(e) => update("moods", e.target.value)}
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label className={labelClassName}>
+                Related Books (slugs, comma-separated)
+              </label>
+              <input
+                type="text"
+                value={form.relatedBooks}
+                onChange={(e) => update("relatedBooks", e.target.value)}
+                className={inputClassName}
+              />
+            </div>
+          </SidebarSection>
+
+          <SidebarSection title="SEO">
+            <div>
+              <label className={labelClassName}>SEO Title</label>
+              <input
+                type="text"
+                value={form.seoTitle}
+                onChange={(e) => update("seoTitle", e.target.value)}
+                className={inputClassName}
+              />
+            </div>
+
+            <div>
+              <label className={labelClassName}>SEO Description</label>
+              <textarea
+                value={form.seoDescription}
+                onChange={(e) => update("seoDescription", e.target.value)}
+                rows={3}
+                className={textareaClassName}
+                required
+              />
+            </div>
+          </SidebarSection>
+
+          {error && <p className="text-sm text-burgundy">{error}</p>}
+
+          <div className="flex flex-col gap-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-5 py-2.5 bg-forest text-cream text-sm rounded-sm hover:bg-forest/90 disabled:opacity-50"
+            >
+              {loading ? "Saving..." : post ? "Update Post" : "Create Post"}
+            </button>
+            {post && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="w-full px-5 py-2.5 text-sm text-burgundy border border-burgundy/30 rounded-sm hover:bg-burgundy/5"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        </aside>
       </div>
     </form>
   );

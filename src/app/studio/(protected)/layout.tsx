@@ -22,7 +22,7 @@ export default async function ProtectedStudioLayout({
   return (
     <div className="min-h-screen bg-cream-dark">
       <header className="bg-forest text-cream border-b border-forest-light">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <span className="font-serif text-sm">Studio</span>
             <nav className="flex items-center gap-4 text-sm">
@@ -67,7 +67,7 @@ export default async function ProtectedStudioLayout({
           <AdminLogoutButton adminPath={adminPath} />
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
+      <main className="max-w-7xl mx-auto px-4 py-8">{children}</main>
     </div>
   );
 }

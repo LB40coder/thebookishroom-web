@@ -1,5 +1,6 @@
 import type { Post as PrismaPost } from "@prisma/client";
 import type { Post } from "@/lib/types";
+import { publicPostFilter } from "@/lib/posts/visibility";
 import { prisma, isDatabaseConfigured } from "@/lib/db";
 
 function toPost(row: PrismaPost): Post {
@@ -33,7 +34,7 @@ export async function getPublishedPosts(options?: {
 
   const rows = await prisma.post.findMany({
     where: {
-      published: true,
+      ...publicPostFilter(),
       ...(options?.mood ? { moods: { has: options.mood } } : {}),
       ...(options?.tag ? { tags: { has: options.tag } } : {}),
       ...(options?.category ? { category: options.category } : {}),
@@ -50,7 +51,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   if (!isDatabaseConfigured()) return null;
 
   const row = await prisma.post.findFirst({
-    where: { slug, published: true },
+    where: { slug, ...publicPostFilter() },
   });
 
   return row ? toPost(row) : null;
@@ -69,7 +70,7 @@ export async function getPostsByRelatedBook(bookSlug: string): Promise<Post[]> {
 
   const rows = await prisma.post.findMany({
     where: {
-      published: true,
+      ...publicPostFilter(),
       relatedBooks: { has: bookSlug },
     },
     orderBy: { publishedAt: "desc" },
@@ -82,7 +83,7 @@ export async function getTrendingPosts(limit = 5): Promise<Post[]> {
   if (!isDatabaseConfigured()) return [];
 
   const rows = await prisma.post.findMany({
-    where: { published: true },
+    where: publicPostFilter(),
     orderBy: [{ views: "desc" }, { publishedAt: "desc" }],
     take: limit,
   });
@@ -94,7 +95,7 @@ export async function getPostSlugs(): Promise<string[]> {
   if (!isDatabaseConfigured()) return [];
 
   const rows = await prisma.post.findMany({
-    where: { published: true },
+    where: publicPostFilter(),
     select: { slug: true },
     orderBy: { publishedAt: "desc" },
   });
