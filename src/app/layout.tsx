@@ -5,7 +5,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getTrendingPosts } from "@/lib/data/posts";
+import { websiteJsonLd } from "@/lib/metadata/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -66,6 +68,7 @@ export default async function RootLayout({
       className={`${playfair.variable} ${inter.variable} ${lora.variable}`}
     >
       <body className="min-h-screen flex flex-col">
+        <JsonLd data={websiteJsonLd()} />
         <AnnouncementBar posts={trendingPosts} />
         <Header />
         <main className="flex-1">{children}</main>

@@ -12,7 +12,9 @@ import { prisma, isDatabaseConfigured } from "@/lib/db";
 import { publicPostFilter } from "@/lib/posts/visibility";
 import { stripHtml } from "@/lib/utils";
 import { buildShareMetadata } from "@/lib/metadata/share";
+import { breadcrumbJsonLd, personJsonLd } from "@/lib/metadata/json-ld";
 import { absoluteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Button } from "@/components/ui/Button";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { CoverImage } from "@/components/ui/CoverImage";
@@ -75,7 +77,26 @@ export default async function AuthorPage({ params }: PageProps) {
       : "";
 
   return (
-    <div className="section-padding">
+    <>
+      <JsonLd
+        data={[
+          personJsonLd({
+            name: author.name,
+            description: stripHtml(author.bio).slice(0, 300),
+            path: `/authors/${author.slug}`,
+            image: author.image,
+            nationality: author.nationality,
+            birthYear: author.birthYear,
+            deathYear: author.deathYear,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Authors", path: "/authors" },
+            { name: author.name, path: `/authors/${author.slug}` },
+          ]),
+        ]}
+      />
+      <div className="section-padding">
       <div className="section-container max-w-3xl">
         <Link
           href="/authors"
@@ -211,6 +232,7 @@ export default async function AuthorPage({ params }: PageProps) {
           </section>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

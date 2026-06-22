@@ -6,7 +6,9 @@ import { getPostBySlug, getPublishedPosts } from "@/lib/data/posts";
 import { getBooksBySlugs } from "@/lib/data/books";
 import { formatDate } from "@/lib/utils";
 import { buildShareMetadata } from "@/lib/metadata/share";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/metadata/json-ld";
 import { absoluteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Button } from "@/components/ui/Button";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
@@ -30,6 +32,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     path: `/reading-lists/${slug}`,
     image: post.coverImage,
     type: "article",
+    publishedTime: post.publishedAt,
+    modifiedTime: post.updatedAt,
   });
 }
 
@@ -45,6 +49,23 @@ export default async function PostPage({ params }: PageProps) {
 
   return (
     <>
+      <JsonLd
+        data={[
+          articleJsonLd({
+            title: post.title,
+            description: post.seoDescription || post.excerpt,
+            path: `/reading-lists/${post.slug}`,
+            image: post.coverImage,
+            publishedAt: post.publishedAt,
+            updatedAt: post.updatedAt,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Reading Lists", path: "/reading-lists" },
+            { name: post.title, path: `/reading-lists/${post.slug}` },
+          ]),
+        ]}
+      />
       <article className="section-padding">
         <div className="section-container max-w-3xl">
           <Link

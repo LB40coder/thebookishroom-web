@@ -7,7 +7,10 @@ import { getAuthorBySlug } from "@/lib/data/authors";
 import { getPostsByRelatedBook } from "@/lib/data/posts";
 import { stripHtml } from "@/lib/utils";
 import { buildShareMetadata } from "@/lib/metadata/share";
+import { bookJsonLd, breadcrumbJsonLd } from "@/lib/metadata/json-ld";
+import { resolveBookCoverImage } from "@/lib/open-library";
 import { absoluteUrl } from "@/lib/site-url";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { Button } from "@/components/ui/Button";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { BuyOnAmazon } from "@/components/books/BuyOnAmazon";
@@ -31,12 +34,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!book) return { title: "Book Not Found" };
 
   const description = stripHtml(book.description).slice(0, 160);
+  const coverImage = await resolveBookCoverImage(
+    book.coverImage,
+    book.title,
+    book.author,
+    book.year
+  );
 
   return buildShareMetadata({
     title: `${book.title} by ${book.author}`,
     description,
     path: `/books/${slug}`,
-    image: book.coverImage,
+    image: coverImage,
     type: "article",
   });
 }
@@ -45,6 +54,13 @@ export default async function BookPage({ params }: PageProps) {
   const { slug } = await params;
   const book = await getBookBySlug(slug);
   if (!book) notFound();
+
+  const coverImage = await resolveBookCoverImage(
+    book.coverImage,
+    book.title,
+    book.author,
+    book.year
+  );
 
   const [author, similarBooks, relatedPosts] = await Promise.all([
     getAuthorBySlug(book.authorSlug),
@@ -57,8 +73,29 @@ export default async function BookPage({ params }: PageProps) {
     .map((s) => similarBySlug.get(s))
     .filter(Boolean);
 
+  const description = stripHtml(book.description).slice(0, 160);
+
   return (
-    <div className="section-padding">
+    <>
+      <JsonLd
+        data={[
+          bookJsonLd({
+            title: book.title,
+            author: book.author,
+            description,
+            path: `/books/${book.slug}`,
+            year: book.year,
+            image: coverImage,
+            genres: book.genres,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Books", path: "/books" },
+            { name: book.title, path: `/books/${book.slug}` },
+          ]),
+        ]}
+      />
+      <div className="section-padding">
       <div className="section-container">
         <Link
           href="/books"
@@ -72,9 +109,9 @@ export default async function BookPage({ params }: PageProps) {
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-24 space-y-0">
               <div className="relative aspect-[3/4] rounded-sm overflow-hidden bg-cream-dark">
-                {book.coverImage ? (
+                {coverImage ? (
                   <CoverImage
-                    src={book.coverImage}
+                    src={coverImage}
                     alt={book.title}
                     variant="detail-book"
                     priority
@@ -226,6 +263,7 @@ export default async function BookPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

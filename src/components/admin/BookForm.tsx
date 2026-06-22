@@ -499,7 +499,7 @@ export function BookForm({
 
       <FormSection
         title="Cover Image"
-        description="Use an image URL or upload a cover file."
+        description="Use an image URL, upload a cover file, or find one on Open Library."
       >
         <ImageField
           label="Cover Image"
@@ -509,6 +509,29 @@ export function BookForm({
           urlPlaceholder="https://m.media-amazon.com/images/I/..."
           urlHelpText="On Amazon: right-click the cover → Copy image address. Also works with Open Library, Google Books, and other direct image URLs."
         />
+        <button
+          type="button"
+          onClick={async () => {
+            if (!form.title.trim() || !form.author.trim()) return;
+            const params = new URLSearchParams({
+              title: form.title.trim(),
+              author: form.author.trim(),
+            });
+            if (form.year > 0) params.set("year", String(form.year));
+
+            const res = await fetch(
+              `/api/admin/open-library/cover?${params.toString()}`
+            );
+            if (!res.ok) return;
+
+            const json = (await res.json()) as { data?: { coverUrl?: string } };
+            if (json.data?.coverUrl) update("coverImage", json.data.coverUrl);
+          }}
+          disabled={!form.title.trim() || !form.author.trim()}
+          className="text-xs text-forest hover:underline disabled:text-coffee/50 disabled:no-underline"
+        >
+          Find cover on Open Library
+        </button>
       </FormSection>
 
       <FormSection
