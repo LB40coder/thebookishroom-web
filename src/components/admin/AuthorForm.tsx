@@ -21,6 +21,7 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [form, setForm] = useState({
     name: author?.name ?? "",
@@ -59,6 +60,7 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     if (stripHtml(form.bio).length < 20) {
       setError("Bio must be at least 20 characters.");
@@ -110,8 +112,14 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
         return;
       }
 
-      router.push(`/${adminPath}/authors`);
-      router.refresh();
+      const data = await res.json();
+
+      if (author) {
+        router.refresh();
+        setSuccess("Author saved.");
+      } else {
+        router.replace(`/${adminPath}/authors/${data.data.id}`);
+      }
     } catch {
       setError("Something went wrong");
     } finally {
@@ -236,6 +244,7 @@ export function AuthorForm({ adminPath, author }: AuthorFormProps) {
       </label>
 
       {error && <p className="text-sm text-burgundy">{error}</p>}
+      {success && <p className="text-sm text-forest">{success}</p>}
 
       <div className="flex gap-3 pt-2">
         <button

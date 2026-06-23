@@ -70,6 +70,7 @@ export function BookForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [genreOptions, setGenreOptions] = useState(() => {
     const bySlug = new Map(initialGenres.map((genre) => [genre.slug, genre]));
     for (const slug of book?.genres ?? []) {
@@ -335,6 +336,7 @@ export function BookForm({
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     const payload = {
       title: form.title,
@@ -379,8 +381,14 @@ export function BookForm({
         return;
       }
 
-      router.push(`/${adminPath}/books`);
-      router.refresh();
+      const data = await res.json();
+
+      if (book) {
+        router.refresh();
+        setSuccess("Book saved.");
+      } else {
+        router.replace(`/${adminPath}/books/${data.data.id}`);
+      }
     } catch {
       setError("Something went wrong");
     } finally {
@@ -844,6 +852,7 @@ export function BookForm({
       </label>
 
       {error && <p className="text-sm text-burgundy">{error}</p>}
+      {success && <p className="text-sm text-forest">{success}</p>}
 
       <div className="flex gap-3 pt-2">
         <button

@@ -54,6 +54,7 @@ export function PostForm({ adminPath, post, affiliateLinks = [] }: PostFormProps
   const editorRef = useRef<RichTextEditorHandle>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [form, setForm] = useState({
     title: post?.title ?? "",
@@ -102,6 +103,7 @@ export function PostForm({ adminPath, post, affiliateLinks = [] }: PostFormProps
     e.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     const publishedAt = fromDatetimeLocalValue(form.publishedAtLocal);
     const published = form.status !== "draft";
@@ -148,8 +150,14 @@ export function PostForm({ adminPath, post, affiliateLinks = [] }: PostFormProps
         return;
       }
 
-      router.push(`/${adminPath}/posts`);
-      router.refresh();
+      const data = await res.json();
+
+      if (post) {
+        router.refresh();
+        setSuccess("Post saved.");
+      } else {
+        router.replace(`/${adminPath}/posts/${data.data.id}`);
+      }
     } catch {
       setError("Something went wrong");
     } finally {
@@ -375,6 +383,7 @@ export function PostForm({ adminPath, post, affiliateLinks = [] }: PostFormProps
           </SidebarSection>
 
           {error && <p className="text-sm text-burgundy">{error}</p>}
+          {success && <p className="text-sm text-forest">{success}</p>}
 
           <div className="flex flex-col gap-2">
             <button

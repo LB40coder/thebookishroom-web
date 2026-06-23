@@ -2,6 +2,7 @@ import { put } from "@vercel/blob";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import sharp from "sharp";
 
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
@@ -12,6 +13,7 @@ const ALLOWED_TYPES = new Set([
 ]);
 
 const MAX_SIZE = 5 * 1024 * 1024;
+const WEBP_QUALITY = 85;
 
 export function validateImageFile(file: File): string | null {
   if (!ALLOWED_TYPES.has(file.type)) {
@@ -21,6 +23,34 @@ export function validateImageFile(file: File): string | null {
     return "Image must be 5 MB or smaller.";
   }
   return null;
+}
+
+async function prepareImageForUpload(
+  file: File,
+  rawBuffer: Buffer
+): Promise<{ buffer: Buffer; mimeType: string; extension: string }> {
+  if (file.type === "image/svg+xml") {
+    return { buffer: rawBuffer, mimeType: file.type, extension: ".svg" };
+  }
+
+  try {
+    const webpBuffer = await sharp(rawBuffer, { animated: file.type === "image/gif" })
+      .rotate()
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer();
+
+    return {
+      buffer: webpBuffer,
+      mimeType: "image/webp",
+      extension: ".webp",
+    };
+  } catch {
+    return {
+      buffer: rawBuffer,
+      mimeType: file.type,
+      extension: extensionForMime(file.type),
+    };
+  }
 }
 
 function extensionForMime(mimeType: string): string {
@@ -51,25 +81,26 @@ export async function uploadImage(file: File): Promise<{
   const validationError = validateImageFile(file);
   if (validationError) throw new Error(validationError);
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const storedName = `${crypto.randomUUID()}${extensionForMime(file.type)}`;
+  const rawBuffer = Buffer.from(await file.arrayBuffer());
+  const prepared = await prepareImageForUpload(file, rawBuffer);
+  const storedName = `${crypto.randomUUID()}${prepared.extension}`;
   const blobPath = `media/${storedName}`;
 
   if (shouldTryBlobUpload()) {
     try {
       // Let the SDK pick OIDC (BLOB_STORE_ID + VERCEL_OIDC_TOKEN) or
       // BLOB_READ_WRITE_TOKEN — do not pass token manually.
-      const blob = await put(blobPath, buffer, {
+      const blob = await put(blobPath, prepared.buffer, {
         access: "public",
-        contentType: file.type,
+        contentType: prepared.mimeType,
         addRandomSuffix: false,
       });
 
       return {
         url: blob.url,
         filename: file.name,
-        mimeType: file.type,
-        size: buffer.length,
+        mimeType: prepared.mimeType,
+        size: prepared.buffer.length,
       };
     } catch (error) {
       const detail =
@@ -86,12 +117,12 @@ export async function uploadImage(file: File): Promise<{
   const year = new Date().getFullYear().toString();
   const uploadDir = path.join(process.cwd(), "public", "uploads", year);
   await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, storedName), buffer);
+  await writeFile(path.join(uploadDir, storedName), prepared.buffer);
 
   return {
     url: `/uploads/${year}/${storedName}`,
     filename: file.name,
-    mimeType: file.type,
-    size: buffer.length,
+    mimeType: prepared.mimeType,
+    size: prepared.buffer.length,
   };
 }
