@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     apple: "/images/favicon.png",
   },
   other: {
-    "google-adsense-account": "ca-pub-5543818748827281",
+    "google-adsense-account": "ca-pub-8111258264870404",
   },
 };
 
