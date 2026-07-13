@@ -72,9 +72,9 @@ function shouldTryBlobUpload(): boolean {
   );
 }
 
-/** Copy bytes into a transferable ArrayBuffer for fetch/`@vercel/blob`. */
-function toUploadBody(buffer: Buffer): Uint8Array {
-  return Uint8Array.from(buffer);
+/** Copy Sharp/Node buffer bytes so fetch bodies stay transferable. */
+function copyImageBytes(buffer: Buffer): Buffer {
+  return Buffer.from(buffer);
 }
 
 export async function uploadImage(file: File): Promise<{
@@ -90,7 +90,7 @@ export async function uploadImage(file: File): Promise<{
   const prepared = await prepareImageForUpload(file, rawBuffer);
   const storedName = `${crypto.randomUUID()}${prepared.extension}`;
   const blobPath = `media/${storedName}`;
-  const uploadBody = toUploadBody(prepared.buffer);
+  const uploadBody = copyImageBytes(prepared.buffer);
 
   if (shouldTryBlobUpload()) {
     try {
@@ -106,7 +106,7 @@ export async function uploadImage(file: File): Promise<{
         url: blob.url,
         filename: file.name,
         mimeType: prepared.mimeType,
-        size: uploadBody.byteLength,
+        size: uploadBody.length,
       };
     } catch (error) {
       const detail =
@@ -123,12 +123,12 @@ export async function uploadImage(file: File): Promise<{
   const year = new Date().getFullYear().toString();
   const uploadDir = path.join(process.cwd(), "public", "uploads", year);
   await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, storedName), Buffer.from(uploadBody));
+  await writeFile(path.join(uploadDir, storedName), uploadBody);
 
   return {
     url: `/uploads/${year}/${storedName}`,
     filename: file.name,
     mimeType: prepared.mimeType,
-    size: uploadBody.byteLength,
+    size: uploadBody.length,
   };
 }
