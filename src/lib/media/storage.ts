@@ -72,6 +72,11 @@ function shouldTryBlobUpload(): boolean {
   );
 }
 
+/** Copy bytes into a transferable ArrayBuffer for fetch/`@vercel/blob`. */
+function toUploadBody(buffer: Buffer): Uint8Array {
+  return Uint8Array.from(buffer);
+}
+
 export async function uploadImage(file: File): Promise<{
   url: string;
   filename: string;
@@ -85,12 +90,13 @@ export async function uploadImage(file: File): Promise<{
   const prepared = await prepareImageForUpload(file, rawBuffer);
   const storedName = `${crypto.randomUUID()}${prepared.extension}`;
   const blobPath = `media/${storedName}`;
+  const uploadBody = toUploadBody(prepared.buffer);
 
   if (shouldTryBlobUpload()) {
     try {
       // Let the SDK pick OIDC (BLOB_STORE_ID + VERCEL_OIDC_TOKEN) or
       // BLOB_READ_WRITE_TOKEN — do not pass token manually.
-      const blob = await put(blobPath, prepared.buffer, {
+      const blob = await put(blobPath, uploadBody, {
         access: "public",
         contentType: prepared.mimeType,
         addRandomSuffix: false,
@@ -100,7 +106,7 @@ export async function uploadImage(file: File): Promise<{
         url: blob.url,
         filename: file.name,
         mimeType: prepared.mimeType,
-        size: prepared.buffer.length,
+        size: uploadBody.byteLength,
       };
     } catch (error) {
       const detail =
@@ -117,12 +123,12 @@ export async function uploadImage(file: File): Promise<{
   const year = new Date().getFullYear().toString();
   const uploadDir = path.join(process.cwd(), "public", "uploads", year);
   await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, storedName), prepared.buffer);
+  await writeFile(path.join(uploadDir, storedName), Buffer.from(uploadBody));
 
   return {
     url: `/uploads/${year}/${storedName}`,
     filename: file.name,
     mimeType: prepared.mimeType,
-    size: prepared.buffer.length,
+    size: uploadBody.byteLength,
   };
 }
