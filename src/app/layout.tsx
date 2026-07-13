@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Inter, Lora } from "next/font/google";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
     apple: "/images/favicon.png",
   },
   other: {
-    "google-adsense-account": "ca-pub-5543818748827281",
+    "google-adsense-account": "ca-pub-3071913387535313",
   },
 };
 
@@ -68,6 +69,12 @@ export default async function RootLayout({
       className={`${playfair.variable} ${inter.variable} ${lora.variable}`}
     >
       <body className="min-h-screen flex flex-col">
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3071913387535313"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <JsonLd data={websiteJsonLd()} />
         <AnnouncementBar posts={trendingPosts} />
         <Header />
