@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3456",
-    "build": "next build",
-    "build:cf": "next build && node scripts/fix-standalone-for-opennext.mjs && opennextjs-cloudflare build --skipNextBuild",
+    "build": "next build && node scripts/fix-standalone-for-opennext.mjs",
+    "build:cf": "opennextjs-cloudflare build",
+    "deploy:cf": "opennextjs-cloudflare deploy",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "start": "next start -p 3456",
     "lint": "eslint"

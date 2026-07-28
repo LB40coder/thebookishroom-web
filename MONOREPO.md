@@ -4,7 +4,7 @@ Este projeto está dividido em três pacotes:
 
 | Pacote | Deploy | Domínio sugerido |
 |--------|--------|------------------|
-| `apps/web` | **Cloudflare Pages** | `www.thebookishroom.com` |
+| `apps/web` | **Cloudflare Workers** (via OpenNext) | `www.thebookishroom.com` |
 | `apps/api` | **Vercel** | `api.thebookishroom.com` |
 | `packages/shared` | (biblioteca interna) | — |
 
@@ -39,30 +39,38 @@ Copie `.env.example` para `.env` na raiz e configure as variáveis.
    - `NEXT_PUBLIC_SITE_URL=https://www.thebookishroom.com`
 7. Domínio customizado: `api.thebookishroom.com`
 
-## Deploy — Web (Cloudflare Pages)
+## Deploy — Web (Cloudflare Workers + OpenNext)
 
-1. No [Cloudflare Dashboard](https://dash.cloudflare.com) → Workers & Pages → Create
-2. Conecte o mesmo repositório GitHub
-3. **Root directory:** `apps/web`
-4. **Build command:** `cd ../.. && npm install && npm run build:web`
-5. **Build output directory:** deixe vazio (OpenNext gera `.open-next/` via Wrangler)
-6. Variáveis de ambiente:
+O frontend **não é um site estático** — o OpenNext gera um Worker em `.open-next/`. Sem o **deploy command**, o build pode passar mas o site retorna 404.
+
+1. No [Cloudflare Dashboard](https://dash.cloudflare.com) → **Workers & Pages** → Create → **Workers** (não "Pages" estático)
+2. Conecte o repositório GitHub `LB40coder/thebookishroom-web`
+3. Em **Settings → Builds**, configure:
+
+| Campo | Valor |
+|-------|-------|
+| **Root directory** | `apps/web` |
+| **Build command** | `cd ../.. && npm install && npm run deploy:web` |
+| **Deploy command** | *(deixe vazio — o deploy já está no build command acima)* |
+| **Build output directory** | deixe **vazio** |
+
+4. Variáveis de ambiente (Build + Deploy):
    - `NEXT_PUBLIC_SITE_URL=https://www.thebookishroom.com`
    - `API_URL=https://api.thebookishroom.com`
    - `NEXT_PUBLIC_API_URL=https://api.thebookishroom.com`
-   - `NODE_VERSION=20`
+   - `NODE_VERSION=22`
 
-> **Importante:** O build do frontend precisa conseguir acessar a API (para gerar páginas estáticas). Configure `API_URL` apontando para a API em produção antes do primeiro deploy.
+> **Importante:** O build precisa acessar a API em produção para gerar páginas estáticas. Configure `API_URL` antes do primeiro deploy.
 
-7. Domínio customizado: `www.thebookishroom.com`
+5. Domínio customizado: `www.thebookishroom.com` (em **Workers & Pages → seu projeto → Custom domains**)
 
-O frontend usa [@opennextjs/cloudflare](https://opennext.js.org/cloudflare) para rodar Next.js no Cloudflare Workers/Pages.
+O frontend usa [@opennextjs/cloudflare](https://opennext.js.org/cloudflare). Deploy local (opcional): `npm run deploy:web` na raiz do monorepo.
 
 ## DNS
 
 | Registro | Destino |
 |----------|---------|
-| `www` | Cloudflare Pages |
+| `www` | Cloudflare Workers (`thebookishroom-web`) |
 | `api` | Vercel (`cname.vercel-dns.com`) |
 
 ## Estrutura

@@ -12,6 +12,7 @@
     "dev:api": "npm run dev --workspace=@bookish/api",
     "build": "npm run build --workspace=@bookish/shared && npm run build --workspace=@bookish/api && npm run build --workspace=@bookish/web",
     "build:web": "npm run build:cf --workspace=@bookish/web",
+    "deploy:web": "npm run build:web && npm run deploy:cf --workspace=@bookish/web",
     "build:api": "npm run build --workspace=@bookish/api",
     "lint": "npm run lint --workspaces --if-present",
     "generate-secrets": "node packages/shared/scripts/generate-secrets.mjs",
