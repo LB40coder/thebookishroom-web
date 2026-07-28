@@ -1,10 +1,13 @@
 const DEFAULT_REVALIDATE = 3600;
+const PRODUCTION_API_URL = "https://api.thebookishroom.com";
 
 function getApiUrl(): string {
   const url =
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:3457";
+    (process.env.NODE_ENV === "development"
+      ? "http://localhost:3457"
+      : PRODUCTION_API_URL);
   return url.replace(/\/$/, "");
 }
 
@@ -26,18 +29,23 @@ export async function apiFetch<T>(
     }
   }
 
-  const res = await fetch(url.toString(), {
-    next: revalidate === false ? { revalidate: 0 } : { revalidate },
-  });
+  try {
+    const res = await fetch(url.toString(), {
+      next: revalidate === false ? { revalidate: 0 } : { revalidate },
+    });
 
-  if (!res.ok) {
-    if (res.status === 404) return null as T;
-    console.warn(`API warning ${res.status}: ${path}`);
+    if (!res.ok) {
+      if (res.status === 404) return null as T;
+      console.warn(`API warning ${res.status}: ${path}`);
+      return null as T;
+    }
+
+    const json = await res.json();
+    return json.data as T;
+  } catch (error) {
+    console.warn(`API fetch failed: ${path}`, error);
     return null as T;
   }
-
-  const json = await res.json();
-  return json.data as T;
 }
 
 export { getApiUrl };

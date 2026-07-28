@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import {
   getAuthorBySlug,
-  getAuthorSlugs,
 } from "@/lib/data/authors";
 import { getPublishedBooksByAuthorSlug } from "@/lib/data/books";
 import { getPostsByRelatedBooks } from "@/lib/data/posts";
@@ -24,11 +23,6 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAuthorSlugs();
-  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
