@@ -1,0 +1,48 @@
+{
+  "name": "@bookish/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3457",
+    "build": "node ../../packages/shared/scripts/ensure-db-url.mjs && prisma generate --schema=../../packages/shared/prisma/schema.prisma && prisma db push --schema=../../packages/shared/prisma/schema.prisma && next build",
+    "start": "next start -p 3457",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@bookish/shared": "*",
+    "@prisma/client": "^5.22.0",
+    "@tiptap/extension-image": "^3.27.1",
+    "@tiptap/extension-link": "^3.27.1",
+    "@tiptap/extension-placeholder": "^3.27.1",
+    "@tiptap/extension-text-align": "^3.27.1",
+    "@tiptap/extension-underline": "^3.27.1",
+    "@tiptap/react": "^3.27.1",
+    "@tiptap/starter-kit": "^3.27.1",
+    "@vercel/blob": "^2.4.1",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "jose": "^6.2.3",
+    "lucide-react": "^1.21.0",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "sanitize-html": "^2.17.5",
+    "sharp": "^0.35.2",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@types/sanitize-html": "^2.16.1",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.9",
+    "postcss": "^8.5.15",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^4.3.1",
+    "typescript": "^6.0.3"
+  }
+}

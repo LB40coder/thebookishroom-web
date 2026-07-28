@@ -1,0 +1,19 @@
+{"timestamp":"00:00:03.205","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:00:07.339","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
+{"timestamp":"00:05:54.753","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.754","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.754","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.754","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.754","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.754","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.754","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.754","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}
+{"timestamp":"00:05:54.755","source":"Server","level":"LOG","message":"prisma:error \"Error in PostgreSQL connection: Error { kind: Closed, cause: None }\""}

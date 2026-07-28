@@ -1,0 +1,23 @@
+{
+  "name": "@bookish/shared",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "prisma generate --schema=./prisma/schema.prisma",
+    "db:generate": "prisma generate --schema=./prisma/schema.prisma",
+    "db:push": "prisma db push --schema=./prisma/schema.prisma",
+    "postinstall": "prisma generate --schema=./prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@vercel/blob": "^2.4.1",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.3",
+    "sanitize-html": "^2.17.5",
+    "sharp": "^0.35.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}

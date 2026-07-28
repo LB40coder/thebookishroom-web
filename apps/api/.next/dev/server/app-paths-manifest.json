@@ -1,0 +1,9 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/public/books/filter/route": "app/api/public/books/filter/route.js",
+  "/api/public/books/route": "app/api/public/books/route.js",
+  "/api/public/moods/[slug]/route": "app/api/public/moods/[slug]/route.js",
+  "/api/public/moods/route": "app/api/public/moods/route.js",
+  "/api/public/posts/route": "app/api/public/posts/route.js",
+  "/api/public/slugs/route": "app/api/public/slugs/route.js"
+}

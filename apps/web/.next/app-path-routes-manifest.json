@@ -1,0 +1,17 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/authors/[slug]/page": "/authors/[slug]",
+  "/authors/page": "/authors",
+  "/book-finder/page": "/book-finder",
+  "/book-moods/[slug]/page": "/book-moods/[slug]",
+  "/book-moods/page": "/book-moods",
+  "/books/[slug]/page": "/books/[slug]",
+  "/books/page": "/books",
+  "/classics/page": "/classics",
+  "/page": "/",
+  "/reading-lists/[slug]/page": "/reading-lists/[slug]",
+  "/reading-lists/page": "/reading-lists",
+  "/robots.txt/route": "/robots.txt",
+  "/sitemap.xml/route": "/sitemap.xml"
+}

@@ -1,0 +1,17 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/authors/[slug]/page": "app/authors/[slug]/page.js",
+  "/authors/page": "app/authors/page.js",
+  "/book-finder/page": "app/book-finder/page.js",
+  "/book-moods/[slug]/page": "app/book-moods/[slug]/page.js",
+  "/book-moods/page": "app/book-moods/page.js",
+  "/books/[slug]/page": "app/books/[slug]/page.js",
+  "/books/page": "app/books/page.js",
+  "/classics/page": "app/classics/page.js",
+  "/page": "app/page.js",
+  "/reading-lists/[slug]/page": "app/reading-lists/[slug]/page.js",
+  "/reading-lists/page": "app/reading-lists/page.js",
+  "/robots.txt/route": "app/robots.txt/route.js",
+  "/sitemap.xml/route": "app/sitemap.xml/route.js"
+}

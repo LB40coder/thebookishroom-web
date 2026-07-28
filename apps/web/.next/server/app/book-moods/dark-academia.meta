@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/book-moods/layout,_N_T_/book-moods/[slug]/layout,_N_T_/book-moods/[slug]/page,_N_T_/book-moods/dark-academia"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/book-moods/$d$slug/__PAGE__",
+    "/book-moods/$d$slug",
+    "/book-moods",
+    "/_index",
+    "/_head"
+  ]
+}

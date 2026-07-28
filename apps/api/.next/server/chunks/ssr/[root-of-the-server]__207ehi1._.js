@@ -1,0 +1,3 @@
+module.exports=[32618,a=>{a.v({className:"inter_c15e96cb-module__0bjUvq__className",variable:"inter_c15e96cb-module__0bjUvq__variable"})},46358,a=>{"use strict";var b=a.i(7997),c=a.i(32618);let d={className:c.default.className,style:{fontFamily:"'Inter', 'Inter Fallback'",fontStyle:"normal"}};null!=c.default.variable&&(d.variable=c.default.variable),a.s(["default",0,function({children:a}){return(0,b.jsx)("html",{lang:"en",className:d.variable,children:(0,b.jsx)("body",{className:"min-h-screen bg-[#F7F1E8] text-[#2B2118]",children:a})})},"metadata",0,{title:"The Bookish Room — Studio",robots:{index:!1,follow:!1}}],46358)},92332,a=>{a.n(a.i(46358))}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__207ehi1._.js.map
