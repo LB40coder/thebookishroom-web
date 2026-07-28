@@ -41,6 +41,36 @@ export async function getPostsByRelatedBook(bookSlug: string): Promise<Post[]> {
   );
 }
 
+export async function getPostsByRelatedBooks(
+  bookSlugs: string[],
+  limit = 6
+): Promise<Post[]> {
+  if (!bookSlugs.length) return [];
+
+  const results = await Promise.all(
+    bookSlugs.map((slug) => getPostsByRelatedBook(slug))
+  );
+
+  const seen = new Set<string>();
+  const merged: Post[] = [];
+
+  for (const posts of results) {
+    for (const post of posts) {
+      if (!seen.has(post.slug)) {
+        seen.add(post.slug);
+        merged.push(post);
+      }
+    }
+  }
+
+  return merged
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    )
+    .slice(0, limit);
+}
+
 export async function getTrendingPosts(limit = 5): Promise<Post[]> {
   return (
     (await apiFetch<Post[]>("/api/public/posts", {

@@ -13,7 +13,10 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
+.open-next/
+**/.open-next/
 
 # production
 /build

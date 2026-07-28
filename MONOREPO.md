@@ -44,18 +44,19 @@ Copie `.env.example` para `.env` na raiz e configure as variáveis.
 1. No [Cloudflare Dashboard](https://dash.cloudflare.com) → Workers & Pages → Create
 2. Conecte o mesmo repositório GitHub
 3. **Root directory:** `apps/web`
-4. **Build command:** `cd ../.. && npm run build:web`
-5. **Build output directory:** `.next` (ou configure OpenNext para Cloudflare)
+4. **Build command:** `cd ../.. && npm install && npm run build:web`
+5. **Build output directory:** deixe vazio (OpenNext gera `.open-next/` via Wrangler)
 6. Variáveis de ambiente:
    - `NEXT_PUBLIC_SITE_URL=https://www.thebookishroom.com`
    - `API_URL=https://api.thebookishroom.com`
    - `NEXT_PUBLIC_API_URL=https://api.thebookishroom.com`
+   - `NODE_VERSION=20`
 
 > **Importante:** O build do frontend precisa conseguir acessar a API (para gerar páginas estáticas). Configure `API_URL` apontando para a API em produção antes do primeiro deploy.
 
 7. Domínio customizado: `www.thebookishroom.com`
 
-> **Nota:** Para Next.js completo no Cloudflare (SSR/ISR), use [@opennextjs/cloudflare](https://opennext.js.org/cloudflare). O build padrão `next build` funciona no Vercel; no Cloudflare pode precisar de configuração adicional.
+O frontend usa [@opennextjs/cloudflare](https://opennext.js.org/cloudflare) para rodar Next.js no Cloudflare Workers/Pages.
 
 ## DNS
 

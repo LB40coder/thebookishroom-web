@@ -1,9 +1,15 @@
 import type { NextConfig } from "next";
+import path from "path";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+const monorepoRoot = path.join(process.cwd(), "../..");
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 const ONE_MONTH = 60 * 60 * 24 * 30;
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  outputFileTracingRoot: monorepoRoot,
   transpilePackages: ["@bookish/shared"],
   images: {
     formats: ["image/avif", "image/webp"],
@@ -42,3 +48,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+initOpenNextCloudflareForDev();

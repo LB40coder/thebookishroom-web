@@ -8,8 +8,7 @@ import {
   getAuthorSlugs,
 } from "@/lib/data/authors";
 import { getPublishedBooksByAuthorSlug } from "@/lib/data/books";
-import { prisma, isDatabaseConfigured } from "@/lib/db";
-import { publicPostFilter } from "@/lib/posts/visibility";
+import { getPostsByRelatedBooks } from "@/lib/data/posts";
 import { stripHtml } from "@/lib/utils";
 import { buildShareMetadata } from "@/lib/metadata/share";
 import { breadcrumbJsonLd, personJsonLd } from "@/lib/metadata/json-ld";
@@ -57,17 +56,11 @@ export default async function AuthorPage({ params }: PageProps) {
   const authorBooks = await getPublishedBooksByAuthorSlug(slug);
 
   const relatedPosts =
-    isDatabaseConfigured() && authorBooks.length > 0
-      ? await prisma.post.findMany({
-          where: {
-            ...publicPostFilter(),
-            relatedBooks: {
-              hasSome: authorBooks.map((book) => book.slug),
-            },
-          },
-          orderBy: { publishedAt: "desc" },
-          take: 6,
-        })
+    authorBooks.length > 0
+      ? await getPostsByRelatedBooks(
+          authorBooks.map((book) => book.slug),
+          6
+        )
       : [];
 
   const period = author.deathYear
