@@ -18,6 +18,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/sanitize-html": "^2.16.1",
     "prisma": "^5.22.0"
   }
 }
