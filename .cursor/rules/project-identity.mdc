@@ -1,0 +1,18 @@
+---
+description: GitHub and project identity for Bookish Room
+alwaysApply: true
+---
+
+# Project identity
+
+For this project, always use:
+
+- **GitHub user**: `LB40coder`
+- **Email**: `projetomilionarioaos40@gmail.com`
+- **Remote repo**: `LB40coder/thebookishroom-web`
+
+When committing or pushing:
+
+- Prefer authenticating as `LB40coder` (not other GitHub accounts).
+- If push fails with 403 because another account is logged in, switch to `LB40coder` before retrying.
+- Do not use `luanbelon` or other personal accounts for this repository.

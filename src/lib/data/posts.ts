@@ -79,6 +79,24 @@ export async function getPostsByRelatedBook(bookSlug: string): Promise<Post[]> {
   return rows.map(toPost);
 }
 
+export async function getPostsByRelatedBooks(
+  bookSlugs: string[],
+  limit = 6
+): Promise<Post[]> {
+  if (!bookSlugs.length || !isDatabaseConfigured()) return [];
+
+  const rows = await prisma.post.findMany({
+    where: {
+      ...publicPostFilter(),
+      relatedBooks: { hasSome: bookSlugs },
+    },
+    orderBy: { publishedAt: "desc" },
+    take: limit,
+  });
+
+  return rows.map(toPost);
+}
+
 export async function getTrendingPosts(limit = 5): Promise<Post[]> {
   if (!isDatabaseConfigured()) return [];
 

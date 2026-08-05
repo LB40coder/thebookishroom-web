@@ -1,6 +1,0 @@
-User-Agent: *
-Allow: /
-Disallow: /api/
-Disallow: /studio/
-
-Sitemap: https://www.thebookishroom.com/sitemap.xml
