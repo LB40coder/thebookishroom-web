@@ -47,7 +47,7 @@ server {
 
 | Variável | Descrição |
 |----------|-----------|
-| `DATABASE_URL` | PostgreSQL (Neon, VPS local, etc.) |
+| `DATABASE_URL` | URL **Direct** do Supabase (PostgreSQL) — ver abaixo |
 | `SESSION_SECRET` | Sessão do Studio |
 | `ADMIN_PASSWORD_HASH` | Senha do admin (bcrypt) |
 | `ADMIN_API_KEY` | API Bearer para `/api/v1/*` |
@@ -79,3 +79,43 @@ public/         → Assets estáticos
 | `@` | Redirect → `www` (no nginx/Caddy) |
 
 Tudo roda no mesmo processo Node — **não precisa** de `API_URL` nem CORS.
+
+## Supabase + Hostinger
+
+O assistente da Hostinger pode pedir `@supabase/supabase-js` e um arquivo `db.js` — **ignore isso**. Este projeto usa **Prisma**, que conecta direto ao Postgres do Supabase via `DATABASE_URL`.
+
+### 1. Copiar a connection string no Supabase
+
+1. [Supabase Dashboard](https://supabase.com/dashboard) → seu projeto
+2. **Connect** → card **Direct** → **Connection string** → **URI**
+3. Copie a URL (substitua `[YOUR-PASSWORD]` pela senha do banco)
+
+### 2. Variáveis no painel Hostinger
+
+Em **Websites** → seu site → **Variáveis de ambiente** (ou na etapa do deploy Node.js), adicione:
+
+| Variável | Valor |
+|----------|--------|
+| `DATABASE_URL` | URI Direct do Supabase |
+| `SESSION_SECRET` | `npm run generate-secrets` |
+| `ADMIN_PASSWORD_HASH` | idem |
+| `ADMIN_API_KEY` | idem |
+| `ADMIN_PATH` | ex: `studio-x7k2` |
+| `NEXT_PUBLIC_SITE_URL` | `https://www.thebookishroom.com` |
+
+### 3. Criar tabelas (primeira vez)
+
+Se o Supabase estiver vazio, após o deploy (ou via SSH):
+
+```bash
+npm run db:push
+```
+
+Ou importe um dump do Neon com `pg_dump` / `psql`.
+
+### 4. Não adicione ao projeto
+
+- `@supabase/supabase-js` — não é usado
+- `db.js` com `createClient` — não é usado
+
+O Prisma já está em `src/lib/db.ts`.

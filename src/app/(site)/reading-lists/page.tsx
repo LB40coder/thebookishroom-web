@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { getPublishedPosts } from "@/lib/data/posts";
 import { getMoods } from "@/lib/data/moods";
 import { PostCard } from "@/components/cards/PostCard";
@@ -6,9 +8,9 @@ import { PostCard } from "@/components/cards/PostCard";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Reading Lists",
+  title: "Journal",
   description:
-    "Browse curated reading lists to discover your next favorite book. Lists organized by mood, genre, and aesthetic.",
+    "Essays, reading lists, and literary notes to help you discover your next favorite book.",
 };
 
 interface PageProps {
@@ -26,21 +28,25 @@ export default async function ReadingListsPage({ searchParams }: PageProps) {
     getMoods(),
   ]);
 
+  const [featured, ...rest] = posts;
+  const isFiltered = Boolean(mood || tag);
+
   return (
     <div className="section-padding">
       <div className="section-container">
-        <header className="max-w-2xl mb-10">
-          <h1 className="text-3xl md:text-4xl font-serif text-ink">
-            Reading Lists
+        <header className="max-w-2xl mb-10 md:mb-12">
+          <p className="editorial-kicker">The journal</p>
+          <h1 className="mt-2 text-3xl md:text-4xl lg:text-5xl font-serif text-ink leading-tight">
+            Reading Lists &amp; Articles
           </h1>
-          <p className="mt-3 text-coffee leading-relaxed">
-            Curated collections of books organized by mood, aesthetic, genre,
-            and literary obsession. Find your next favorite read.
+          <p className="mt-4 text-coffee font-reading leading-relaxed text-base md:text-lg">
+            Curated collections and literary essays organized by mood, genre,
+            and obsession. Pour a cup of tea and settle in.
           </p>
         </header>
 
-        <div className="mb-8 flex flex-wrap gap-2">
-          <span className="text-sm text-coffee mr-2 self-center">Filter by mood:</span>
+        <div className="mb-10 flex flex-wrap gap-2">
+          <span className="text-sm text-coffee mr-2 self-center">Browse by mood:</span>
           <a
             href="/reading-lists"
             className={`text-xs px-3 py-1.5 rounded-sm border transition-colors ${
@@ -67,15 +73,38 @@ export default async function ReadingListsPage({ searchParams }: PageProps) {
         </div>
 
         {posts.length === 0 ? (
-          <p className="text-coffee text-center py-12">
-            No reading lists found yet. Check back soon for curated recommendations.
+          <p className="text-coffee text-center py-12 font-reading">
+            No articles yet. Check back soon for curated recommendations.
           </p>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <PostCard key={post.slug} post={post} />
-            ))}
-          </div>
+          <>
+            {!isFiltered && featured && (
+              <div className="mb-12 pb-12 border-b border-coffee/10">
+                <PostCard post={featured} variant="featured" />
+              </div>
+            )}
+
+            <div className="flex flex-col gap-10 md:gap-12">
+              {(isFiltered ? posts : rest).map((post) => (
+                <PostCard key={post.slug} post={post} variant="horizontal" />
+              ))}
+            </div>
+
+            {!isFiltered && rest.length > 0 && (
+              <div className="mt-12 pt-8 border-t border-coffee/10 text-center">
+                <p className="text-sm text-coffee font-reading mb-4">
+                  Looking for books by mood or author?
+                </p>
+                <Link
+                  href="/book-moods"
+                  className="inline-flex items-center gap-1.5 text-sm text-burgundy font-medium hover:underline"
+                >
+                  Explore book moods
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

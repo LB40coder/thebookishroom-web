@@ -33,7 +33,7 @@ const socialLinks = [
 
 const exploreLinks = [
   { href: "/", label: "Home" },
-  { href: "/reading-lists", label: "Reading Lists" },
+  { href: "/reading-lists", label: "Journal" },
   { href: "/book-moods", label: "Book Moods" },
   { href: "/classics", label: "Classics" },
   { href: "/authors", label: "Authors" },
@@ -57,9 +57,9 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           <div>
             <Logo size="lg" />
-            <p className="mt-3 text-sm text-coffee leading-relaxed">
-              A cozy corner for book lovers. Discover your next favorite read
-              through curated lists, moods, and timeless classics.
+            <p className="mt-3 text-sm text-coffee leading-relaxed font-reading">
+              A cozy literary journal for book lovers. Essays, curated lists,
+              and timeless recommendations for your next great read.
             </p>
             <div className="mt-4 flex items-center gap-2">
               {socialLinks.map(({ href, label, icon: Icon }) => (

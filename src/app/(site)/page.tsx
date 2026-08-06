@@ -1,10 +1,9 @@
-import { Hero } from "@/components/home/Hero";
+import { BlogHero } from "@/components/home/BlogHero";
+import { EditorialFeed } from "@/components/home/EditorialFeed";
 import { BrowseByMood } from "@/components/home/BrowseByMood";
-import { FeaturedReadingLists } from "@/components/home/FeaturedReadingLists";
 import { StartWithClassics } from "@/components/home/StartWithClassics";
 import { PopularAuthors } from "@/components/home/PopularAuthors";
 import { BookFinderCTA } from "@/components/home/BookFinderCTA";
-import { LatestArticles } from "@/components/home/LatestArticles";
 import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 
 export const revalidate = 86400;
@@ -12,13 +11,12 @@ export const revalidate = 86400;
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <BlogHero />
+      <EditorialFeed />
       <BrowseByMood />
-      <FeaturedReadingLists />
       <StartWithClassics />
       <PopularAuthors />
       <BookFinderCTA />
-      <LatestArticles />
       <NewsletterBanner />
     </>
   );

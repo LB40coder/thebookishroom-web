@@ -10,7 +10,7 @@ import { Logo } from "@/components/ui/Logo";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/reading-lists", label: "Reading Lists" },
+  { href: "/reading-lists", label: "Journal" },
   { href: "/book-moods", label: "Book Moods" },
   { href: "/classics", label: "Classics" },
   { href: "/authors", label: "Authors" },
@@ -27,7 +27,7 @@ export function Header() {
     <>
       <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur-sm border-b border-coffee/10">
         <div className="section-container">
-          <div className="flex items-center justify-between h-16 md:h-18">
+          <div className="flex items-center justify-between h-16 md:h-[4.5rem]">
             <Logo size="sm" className="md:hidden" />
             <Logo size="md" className="hidden md:block" />
 
@@ -38,11 +38,14 @@ export function Header() {
                   href={link.href}
                   className={cn(
                     "text-sm text-ink/80 hover:text-ink transition-colors relative py-1",
-                    pathname === link.href && "text-ink font-medium"
+                    (pathname === link.href ||
+                      (link.href !== "/" && pathname.startsWith(link.href))) &&
+                      "text-ink font-medium"
                   )}
                 >
                   {link.label}
-                  {pathname === link.href && (
+                  {(pathname === link.href ||
+                    (link.href !== "/" && pathname.startsWith(link.href))) && (
                     <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-burgundy rounded-full" />
                   )}
                 </Link>
@@ -89,7 +92,8 @@ export function Header() {
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     "px-3 py-2.5 text-sm rounded-sm hover:bg-cream-dark transition-colors",
-                    pathname === link.href
+                    pathname === link.href ||
+                      (link.href !== "/" && pathname.startsWith(link.href))
                       ? "text-burgundy font-medium bg-cream-dark"
                       : "text-ink/80"
                   )}

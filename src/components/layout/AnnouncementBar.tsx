@@ -39,7 +39,7 @@ export function AnnouncementBar({ posts }: AnnouncementBarProps) {
       <div className="section-container flex items-center gap-2 sm:gap-3">
         <span className="inline-flex items-center gap-1.5 shrink-0 text-gold font-medium">
           <TrendingUp className="w-3.5 h-3.5" />
-          Trending
+          Just published
         </span>
 
         <span className="text-cream/30 hidden sm:inline">|</span>
