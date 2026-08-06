@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Search, Mail, Menu, X } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SearchDialog } from "@/components/search/SearchDialog";
 import { Logo } from "@/components/ui/Logo";
@@ -60,13 +60,6 @@ export function Header() {
               >
                 <Search className="w-5 h-5" />
               </button>
-              <Link
-                href="/#newsletter"
-                className="hidden sm:inline-flex items-center gap-1.5 text-sm text-burgundy border border-burgundy rounded-sm px-3 py-1.5 hover:bg-burgundy/5 transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                Newsletter
-              </Link>
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
                 className="lg:hidden p-2 text-ink/70 hover:text-ink"
@@ -101,13 +94,6 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/#newsletter"
-                onClick={() => setMobileOpen(false)}
-                className="sm:hidden px-3 py-2.5 text-sm text-burgundy font-medium"
-              >
-                Newsletter
-              </Link>
             </div>
           </nav>
         )}

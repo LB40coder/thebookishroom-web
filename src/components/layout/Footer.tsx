@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { NewsletterForm } from "@/components/ui/NewsletterForm";
 import { Logo } from "@/components/ui/Logo";
 import {
   InstagramIcon,
@@ -54,7 +53,7 @@ export function Footer() {
   return (
     <footer className="bg-cream-dark border-t border-coffee/10">
       <div className="section-container section-padding">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           <div>
             <Logo size="lg" />
             <p className="mt-3 text-sm text-coffee leading-relaxed font-reading">
@@ -111,16 +110,6 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div>
-            <h3 className="font-serif text-base font-semibold text-ink mb-3">
-              Stay in the loop
-            </h3>
-            <p className="text-sm text-coffee mb-3">
-              Get cozy reading recommendations in your inbox.
-            </p>
-            <NewsletterForm variant="compact" />
           </div>
         </div>
 

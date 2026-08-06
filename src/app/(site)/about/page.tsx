@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 
 export const revalidate = 86400;
 
@@ -59,7 +58,6 @@ export default function AboutPage() {
           </div>
         </div>
       </div>
-      <NewsletterBanner />
     </>
   );
 }

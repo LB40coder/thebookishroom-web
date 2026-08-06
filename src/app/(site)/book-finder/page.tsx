@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import type { Book } from "@/lib/types";
 import { BookCard } from "@/components/cards/BookCard";
-import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 
 const filterOptions = {
   mood: [
@@ -194,7 +193,6 @@ export default function BookFinderPage() {
           )}
         </div>
       </div>
-      <NewsletterBanner />
     </>
   );
 }

@@ -11,7 +11,6 @@ import { absoluteUrl } from "@/lib/site-url";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Button } from "@/components/ui/Button";
 import { ShareButtons } from "@/components/ui/ShareButtons";
-import { NewsletterBanner } from "@/components/home/NewsletterBanner";
 import { CoverImage } from "@/components/ui/CoverImage";
 import { RichTextContent } from "@/components/ui/RichTextContent";
 import { PostCard } from "@/components/cards/PostCard";
@@ -208,8 +207,6 @@ export default async function PostPage({ params }: PageProps) {
           </section>
         )}
       </article>
-
-      <NewsletterBanner />
     </>
   );
 }
